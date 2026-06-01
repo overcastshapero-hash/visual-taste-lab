@@ -264,46 +264,37 @@
   <main class="max-w-[1500px] mx-auto px-6 pt-6 pb-20">
 
     <!-- HERO -->
-    <section class="mb-6">
+    <section class="mb-5">
       <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mb-3">
-        <span class="text-[10px] tracking-[1.5px] px-2.5 py-1 rounded-full bg-white/5 text-[#b8935a] border border-white/5">DNA 预设 + 8 维度微调</span>
-        <span class="text-[10px] tracking-[1.5px] px-2.5 py-1 rounded-full bg-white/5 text-[#5a8a9a] border border-white/5">MJ SREF 代码</span>
-        <span class="text-[10px] tracking-[1.5px] px-2.5 py-1 rounded-full bg-white/5 text-[#737380] border border-white/5">反推 Prompt 引擎</span>
+        <span class="text-[10px] tracking-[1.5px] px-2.5 py-1 rounded-full bg-white/5 text-[#b8935a] border border-white/5">DNA 预设 + 8 维度</span>
+        <span class="text-[10px] tracking-[1.5px] px-2.5 py-1 rounded-full bg-white/5 text-[#5a8a9a] border border-white/5">MJ SREF</span>
+        <span class="text-[10px] tracking-[1.5px] px-2.5 py-1 rounded-full bg-white/5 text-[#737380] border border-white/5">反推引擎</span>
       </div>
-      <h1 class="text-2xl sm:text-3xl tracking-tight font-semibold leading-tight mb-4">
+      <h1 class="text-2xl sm:text-3xl tracking-tight font-semibold leading-tight mb-3">
         直接问 AI 写的 Prompt，和用这个造的，差距有多大。
       </h1>
 
-      <!-- COMPARISON -->
+      <!-- COMPARISON: left=AI, right=YOUR live output -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-4xl">
-        <div class="panel p-4 border-red-500/20" style="border-left:3px solid rgba(239,68,68,0.4)">
+        <div class="panel p-4" style="border-left:3px solid rgba(239,68,68,0.4)">
           <div class="text-[10px] tracking-[1.5px] text-red-400/70 mb-1.5 font-semibold">你直接问 AI 拿到的</div>
           <div class="prompt-mono text-[11px] text-[#888] leading-relaxed">
             "a cinematic photo of a lonely architect at dusk, film look, cinematic lighting, professional photography"
           </div>
-          <div class="text-[10px] text-[#666] mt-2">→ 通用、模糊、每次结果不一样、不可控</div>
+          <div class="text-[10px] text-[#666] mt-2">→ 通用 · 模糊 · 每次不同 · 不可控</div>
         </div>
-        <div class="panel p-4" style="border-left:3px solid rgba(184,147,90,0.5)">
-          <div class="text-[10px] tracking-[1.5px] text-[#b8935a] mb-1.5 font-semibold">用这个造出来的</div>
-          <div class="prompt-mono text-[11px] text-[#c0c0c8] leading-relaxed">
-            一个孤独的建筑师站在粗野主义天文台边缘，暮色沉入深靛蓝。Kodak Portra 400, 35mm spherical lens。Rembrandt lighting, heavy atmospheric haze。Desaturated cold blue-gray, contemporary, subtle film grain。Rule of thirds。Photorealistic, cinematic, 8k。
+        <div class="panel p-4" style="border-left:3px solid rgba(184,147,90,0.5)" id="hero-live-panel">
+          <div class="flex items-center gap-x-2 mb-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#b8935a]" id="hero-dot"></span>
+            <div class="text-[10px] tracking-[1.5px] text-[#b8935a] font-semibold">用这个造出来的（实时）</div>
           </div>
-          <div class="text-[10px] text-[#b8935a] mt-2">→ 具体、精确、每项技术都经过验证、可复现</div>
+          <div id="hero-live-text" class="prompt-mono text-[11px] text-[#909098] leading-relaxed" style="min-height:20px">
+            选择下方的 DNA 预设或维度选项，这里会实时显示你正在构建的 Prompt。
+          </div>
+          <div id="hero-live-tag" class="text-[10px] text-[#555] mt-2"></div>
         </div>
       </div>
     </section>
-
-    <!-- LIVE PREVIEW BAR -->
-    <div id="live-preview" class="panel p-3 mb-5" style="background:#0a0a0e;border-color:rgba(184,147,90,0.15)">
-      <div class="flex items-center gap-x-2 mb-1.5">
-        <span class="w-1.5 h-1.5 rounded-full bg-[#b8935a] animate-pulse"></span>
-        <span class="text-[9px] tracking-[1.5px] text-[#b8935a] font-semibold">实时预览</span>
-        <span class="text-[9px] text-[#555]">— 你的 Prompt 正在被构建，选择任何选项即可看到变化</span>
-      </div>
-      <div id="live-prompt-text" class="prompt-mono text-[12px] text-[#909098] leading-relaxed" style="min-height:20px">
-        从下方 DNA 预设开始，或直接选择维度选项。每一步都会实时反映在这里。
-      </div>
-    </div>
 
     <!-- ===== DNA PRESETS ===== -->
     <section class="mb-6" aria-labelledby="presets-heading">
@@ -400,6 +391,14 @@
                 <button onclick="copyPrompt()" class="btn-ghost text-[10px] py-1">复制</button>
               </div>
               <div id="full-prompt" class="prompt-mono bg-[#08080b] border border-white/10 p-4 rounded-xl text-[#c0c0c8] whitespace-pre-wrap max-h-[260px] overflow-auto select-all" role="textbox" tabindex="0"></div>
+
+              <!-- VARIANT TABS -->
+              <div id="variant-tabs" class="hidden flex gap-1.5 mt-2">
+                <button onclick="switchVariant(0)" id="vtab-0" class="text-[10px] px-2.5 py-1 rounded-lg bg-[#b8935a]/15 border border-[#b8935a]/30 text-[#b8935a] font-semibold">精确版</button>
+                <button onclick="switchVariant(1)" id="vtab-1" class="text-[10px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[#888]">更大胆</button>
+                <button onclick="switchVariant(2)" id="vtab-2" class="text-[10px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[#888]">更克制</button>
+              </div>
+
               <div id="sref-display" class="hidden mt-2"></div>
             </div>
             <div class="lg:col-span-5">
@@ -707,17 +706,25 @@ Source: @erenturkmen — ❤1,534 · 🔖3,340 · 👁181k`;
     }
 
     function updateLivePreview() {
-      const el = document.getElementById('live-prompt-text');
+      const el = document.getElementById('hero-live-text');
+      const tag = document.getElementById('hero-live-tag');
+      const dot = document.getElementById('hero-dot');
       const selCount = Object.keys(selections).length;
       if (selCount === 0 && selectedSREFs.length === 0) {
-        el.textContent = '从下方 DNA 预设开始，或直接选择维度选项。每一步都会实时反映在这里。';
-        el.style.color = '#909098';
+        el.textContent = '选择下方的 DNA 预设或维度选项，这里会实时显示你正在构建的 Prompt。';
+        el.style.color = '#909098'; tag.textContent = ''; dot.style.background = '#555';
         return;
       }
-      // Build preview using same logic as forge, with placeholder subject
       const preview = buildPrompt('[你的主体描述]');
       el.textContent = preview;
       el.style.color = '#c0c0c8';
+      dot.style.background = '#b8935a';
+      const parts = [];
+      if (activePresetId) { const p = DNA_PRESETS.find(x=>x.id===activePresetId); parts.push(p?.name); }
+      if (selCount) parts.push(`${selCount}/8 维度`);
+      if (selectedSREFs.length) parts.push(`${selectedSREFs.length} SREF`);
+      tag.textContent = '→ ' + (parts.join(' · ') || '自定义配置') + ' · 精确 · 可复现';
+      tag.style.color = '#b8935a';
     }
 
     // ==================== IMAGE UPLOAD ====================
@@ -798,15 +805,52 @@ Source: @erenturkmen — ❤1,534 · 🔖3,340 · 👁181k`;
     }
 
     // ==================== FORGE ====================
+    let promptVariants = [];
+
     function forgePrompt() {
       const subject=document.getElementById('subject').value.trim();
       if(!subject){showToast('请描述主体和场景');return;}
-      const prompt=buildPrompt(subject);
-      document.getElementById('full-prompt').textContent=prompt;
+      
+      // Generate 3 variants
+      const base = buildPrompt(subject);
+      const bold = base
+        .replace(/subtle/gi, 'pronounced')
+        .replace(/soft/gi, 'dramatic')
+        .replace(/natural/gi, 'intensified')
+        .replace(/balanced/gi, 'high-contrast')
+        .replace(/restrained/gi, 'bold')
+        + '. Dramatic contrast, intensified mood, powerful presence';
+      const subtle = base
+        .replace(/pronounced/gi, 'subtle')
+        .replace(/dramatic/gi, 'gentle')
+        .replace(/harsh/gi, 'soft')
+        .replace(/heavy/gi, 'light')
+        .replace(/high contrast/gi, 'balanced')
+        + '. Restrained, naturalistic, minimal intervention';
+      promptVariants = [base, bold, subtle];
+      
+      // Show default variant (index 0)
+      switchVariant(0);
+      
       document.getElementById('output').classList.remove('hidden');
+      document.getElementById('variant-tabs').classList.remove('hidden');
       const sd=document.getElementById('sref-display');
       if(selectedSREFs.length){sd.classList.remove('hidden');sd.innerHTML=selectedSREFs.map(s=>`<div class="flex items-center gap-x-2 text-xs text-[#5a8a9a] font-mono"><span>--sref ${s.code} --v 7 --sv6</span><button onclick="navigator.clipboard.writeText('--sref ${s.code} --v 7 --sv6').then(()=>showToast('已复制'))" class="text-[9px] px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10">复制</button></div>`).join('');}else{sd.classList.add('hidden');}
       renderColorPreview();renderSelectionBreakdown();document.getElementById('output').scrollIntoView({behavior:'smooth'});
+    }
+
+    function switchVariant(idx) {
+      document.getElementById('full-prompt').textContent = promptVariants[idx] || promptVariants[0];
+      // Update tab styles
+      for(let i=0;i<3;i++){
+        const tab = document.getElementById('vtab-'+i);
+        if(!tab) continue;
+        if(i===idx){
+          tab.className = 'text-[10px] px-2.5 py-1 rounded-lg bg-[#b8935a]/15 border border-[#b8935a]/30 text-[#b8935a] font-semibold';
+        } else {
+          tab.className = 'text-[10px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[#888]';
+        }
+      }
     }
 
     function buildPrompt(subject) {

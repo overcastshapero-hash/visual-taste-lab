@@ -66,6 +66,15 @@
     }
     .opt-chip:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.12); }
     .opt-chip.selected { background: rgba(184,147,90,0.1); border-color: var(--gold); color: var(--gold); }
+    .why-dot {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 13px; height: 13px; margin-left: 4px; border-radius: 50%;
+      font-size: 8px; font-weight: 700; line-height: 1; cursor: help;
+      color: #888; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.12s; flex-shrink: 0;
+    }
+    .why-dot:hover { color: var(--gold); border-color: var(--gold); background: rgba(184,147,90,0.12); }
+    .dim-label .name { display: inline-flex; align-items: center; }
     .opt-swatch { width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.08); }
 
     /* ===== PANELS ===== */
@@ -567,6 +576,76 @@
       ]},
     ];
 
+    // ==================== 「为什么有效」知识层 ====================
+    // 模型已经有审美，你没有。这一层不是为了喂模型，是为了训练你的眼睛——
+    // 这才是"为什么不直接问 AI"的真答案。
+    const DIM_WHY = {
+      lens: "镜头决定『空间被压缩还是被拉开』。长焦把背景拉近、人脸变好看；广角制造纵深和压迫感。换镜头＝换观众和被摄物的心理距离。",
+      film: "胶片是『颜色的性格』。数码默认中性，胶片自带偏色和颗粒——它让画面有『被某种材料记录过』的实感，这是 AI 味的反面。",
+      lighting: "光是最强的变量。同一张脸，伦勃朗光显贵、顶光显凶、平光显廉价。先定光，再谈别的。",
+      color: "调色是情绪的滤镜。它不改内容，只改你看完的感受：青橙＝电影感，去饱和＝高级克制，暖大地＝怀旧。",
+      composition: "构图决定『眼睛先看哪、信息怎么排队』。对称＝秩序威严，三分＝自然舒服，留白巨大＝渺小感。",
+      texture: "质感是『真实度的指纹』。颗粒、光晕、镜头光斑这些『瑕疵』，恰恰是大脑判断『这是真照片』的依据。太干净＝假。",
+      atmosphere: "氛围给空气以重量。雾、雨、尘让光变得可见、让空间有层次——空气不空，画面才有呼吸。",
+      era: "年代是一整套视觉默认值的开关。说『90s』，模型自动调出那个年代的色彩、颗粒、审美惯性，比你逐项描述省力。",
+    };
+    const WHY = {
+      "lens-35mm":"35mm 接近人眼又略带环境感，最『诚实』的镜头，纪实和自然主义首选。",
+      "lens-50mm":"50mm 标准镜畸变最小、所见即所得——想要中性、不耍花招时用它。",
+      "lens-85mm":"85mm 大光圈把背景化成奶油虚化、压缩人脸比例——人像显瘦显贵的秘密。",
+      "lens-24mm":"24mm 广角夸张前后景、制造戏剧纵深，但凑太近会把脸拍变形。",
+      "lens-100mm":"100mm 微距放大肌理（水珠、皮肤、织物），让微小的东西有史诗感。",
+      "lens-anamorphic":"变形宽银幕＝椭圆虚化＋水平蓝光斑，『电影感』三个字最直接的来源。",
+      "lens-imax":"IMAX 70mm 是极限分辨率和画幅，给宏大场面以压倒性的体量。",
+      "film-portra":"Portra 400 还原暖肤色、颗粒细——拍人、拍温柔场景的安全牌。",
+      "film-cinestill":"Cinestill 800T 的招牌是灯光周围的红色光晕，夜景霓虹瞬间有『被胶片拍下』的味道。",
+      "film-vision3":"Vision3 电影负片宽容度高，大光比也不死黑不死白，明暗细节都留得住。",
+      "film-trix":"Tri-X 黑白高反差、颗粒粗犷，纪实和硬朗气质的经典。",
+      "film-superia":"Fuji Superia 阴影偏冷绿，日系、都市、微微疏离的色调。",
+      "film-kodachrome":"褪色 Kodachrome 的暖偏移＝旧照片怀旧感，时间被印在颜色里。",
+      "film-ektachrome":"褪色 Ektachrome 冷蓝偏移、交叉冲洗感，复古又带点不安。",
+      "light-rembrandt":"伦勃朗光在暗侧脸颊留一个三角光——立体、内敛、『有故事』的经典人像光。",
+      "light-chiaroscuro":"明暗对照＝大片死黑配一束强光，戏剧、悬疑、神性的来源（卡拉瓦乔那套）。",
+      "light-volumetric":"体积光让光束在雾里现形（丁达尔效应），神圣感和空间感一次到位。",
+      "light-golden":"黄金时刻太阳低、光暖、影子长——一天里最讨喜、最不会拍丑的光。",
+      "light-neon":"霓虹实用光＝多种色温混在一起，都市夜的暧昧和电影感。",
+      "light-overcast":"阴天＝天然柔光箱，没有硬影、肤色均匀——最温柔也最安全的光。",
+      "light-desert":"沙漠硬侧光＝强方向性、强阴影，糙、硬、有张力。",
+      "light-softbox":"影棚柔光箱可控、眼里有『眼神光』——商业、干净、确定性的光。",
+      "color-teal":"青橙调把肤色（暖）和背景（冷）拉开，好莱坞用烂了但确实最快出『电影感』。",
+      "color-cold":"冷调去饱和＝克制、高级、严肃，史诗片和高端品牌最爱的『不喧哗』。",
+      "color-warm":"暖大地色＝有机、怀旧、踏实，人和自然的温度。",
+      "color-pastel":"褪色粉彩＝低饱和、细腻、文艺，安静电影的调子。",
+      "color-bw":"高反差黑白去掉颜色干扰，只剩光影和形——最考验也最显功力。",
+      "color-ethereal":"空灵自然色＝透气、梦幻，逆光和清晨的味道。",
+      "color-sinister":"过饱和的明亮粉彩制造『美得不对劲』的不安，恐怖和荒诞片的反差用法。",
+      "comp-thirds":"三分法把主体放在交点，比死正中更自然耐看——最不会错的构图。",
+      "comp-symmetry":"绝对对称＝秩序、威严、强迫感，库布里克的招牌。",
+      "comp-dutch":"斜角（Dutch）把地平线歪掉，制造失衡和心理不安。",
+      "comp-vast":"巨大空间＋渺小人影＝人在环境前的渺小感，史诗和孤独的视觉化。",
+      "comp-closeup":"极端特写填满画面＝强迫亲密，逼观众直面情绪。",
+      "comp-wide":"广角全景先交代『这是哪』，建立场景和上下文。",
+      "comp-center":"正中构图＝直视、纪念碑式、不容回避的存在感。",
+      "tex-grain":"微妙颗粒＝胶片的呼吸，骗过大脑判定『这是真照片』的最小剂量。",
+      "tex-heavy":"强颗粒＝粗粝、街头、纪实的硬度。",
+      "tex-halation":"Cinestill 光晕＝亮部周围泛红光，夜景灯光的『胶片味』招牌。",
+      "tex-flares":"变形镜头光斑＝水平蓝色拉丝，科幻和电影感的视觉签名。",
+      "tex-clean":"干净无颗粒＝数字锐利，产品、科技、未来感要的『零瑕疵』。",
+      "tex-weathered":"风化做旧＝时间留下的痕迹，让物体有被使用过的真实重量。",
+      "atmo-haze":"薄雾按距离把画面分层，制造纵深——远处越淡，空间越深。",
+      "atmo-clear":"通透锐利＝信息全清晰，纪实、产品、需要看清细节时用。",
+      "atmo-rain":"雨后湿地反光、霓虹倒影——夜景质感和情绪的放大器。",
+      "atmo-dust":"光束里的浮尘让光『看得见』，干燥、苍凉、史诗的空气。",
+      "atmo-fog":"浓雾隐去背景＝神秘、留白、不确定，恐怖和诗意都靠它。",
+      "atmo-night":"深夜把黑当成构图元素，让少量的光更有分量。",
+      "era-70s":"70s＝暖调模拟感、复古色彩，一键唤起那个年代的胶片记忆。",
+      "era-90s":"90s＝VHS 纹理、特定偏色和颗粒，怀旧亚文化的视觉锚。",
+      "era-now":"当代＝现代色彩科学、干净通透，没有年代滤镜的『此刻』。",
+      "era-vintage":"怀旧复古＝泛黄做旧的老照片感，时间感优先于真实感。",
+      "era-future":"未来感＝极简、冷净、克制设计，科技和概念的视觉语言。",
+      "era-timeless":"无时代感＝去掉一切年代线索，让画面属于任何时间，经典片的做法。",
+    };
+
     // ==================== SREF ====================
     const SREF_OPTIONS = [
       {id:"sref-wkw",code:"1973657662",name:"王家卫霓虹夜",source:"@promptsref",likes:17,bookmarks:11,characteristic:"暖红+青绿 · 梦幻失焦 · 老胶片质感 · 1990s亚洲夜",promptIdeas:"neon-lit streets, motion blur, film grain, emotional portraits, nighttime city, 1990s Asian city"},
@@ -634,7 +713,7 @@ Source: @erenturkmen — ❤1,534 · 🔖3,340 · 👁181k`;
         <div class="dim-row">
           <div class="dim-label">
             <div class="icon"><i class="fa-solid ${dim.icon}"></i></div>
-            <div class="name">${dim.label}</div>
+            <div class="name">${dim.label}<span class="why-dot" onclick="showWhy('${dim.id}',null)" role="button" tabindex="0" aria-label="${dim.label}维度在控制什么" title="这个维度在控制什么" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showWhy('${dim.id}',null)}">?</span></div>
             <div class="sub">${dim.sub}</div>
           </div>
           <div class="dim-options">
@@ -643,7 +722,7 @@ Source: @erenturkmen — ❤1,534 · 🔖3,340 · 👁181k`;
                    onclick="selectOption('${dim.id}','${opt.id}')"
                    role="radio" aria-checked="${selections[dim.id]===opt.id}"
                    tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectOption('${dim.id}','${opt.id}')}">
-                <div class="opt-swatch ${opt.swatch}"></div><span>${opt.label}</span>
+                <div class="opt-swatch ${opt.swatch}"></div><span>${opt.label}</span>${WHY[opt.id]?`<span class="why-dot" onclick="event.stopPropagation();showWhy('${dim.id}','${opt.id}')" role="button" tabindex="0" aria-label="为什么${opt.label}有效" title="为什么有效" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();showWhy('${dim.id}','${opt.id}')}">?</span>`:''}
               </div>
             `).join('')}
             ${selections[dim.id] ? `<div class="opt-chip" onclick="selectOption('${dim.id}',null)" style="border-color:transparent;background:transparent;color:#555;font-size:10px">✕</div>` : ''}
@@ -936,6 +1015,18 @@ Source: @erenturkmen — ❤1,534 · 🔖3,340 · 👁181k`;
     function copyForModel(m){let t=document.getElementById('full-prompt').textContent;if(m==='flux')t+=' --ar 16:9 --stylize 600';if(m==='mj')t+=' --ar 16:9 --stylize 200 --v 7 --style raw';navigator.clipboard.writeText(t).then(()=>showToast('已复制'));}
 
     function showToast(msg){const ex=document.querySelector('.toast');if(ex)ex.remove();const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity 0.2s';setTimeout(()=>t.remove(),200);},1800);}
+
+    function showWhy(dimId, optId){
+      const dim = DIMENSIONS.find(d=>d.id===dimId);
+      const opt = (dim && optId) ? dim.options.find(o=>o.id===optId) : null;
+      const dimWhy = DIM_WHY[dimId] || '';
+      const optWhy = optId ? (WHY[optId]||'') : '';
+      const title = opt ? `${dim.label} · ${opt.label}` : `${dim.label} — 这个维度在控制什么`;
+      let content = '';
+      if(dimWhy) content += `<div class="${optWhy?'mb-3':''}"><div class="text-[10px] uppercase tracking-wider text-[#b8935a] mb-1">这个维度在控制什么</div><div class="text-[13px] text-[#c0c0c8] leading-relaxed">${dimWhy}</div></div>`;
+      if(optWhy) content += `<div><div class="text-[10px] uppercase tracking-wider text-[#5a8a9a] mb-1">为什么「${opt.label}」有效</div><div class="text-[13px] text-[#c0c0c8] leading-relaxed">${optWhy}</div></div>`;
+      document.getElementById('modal-container').innerHTML=`<div class="modal-overlay" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-label="${title}" style="display:flex;align-items:center;justify-content:center;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:100;animation:fadeIn 0.15s ease"><div class="modal-box" onclick="event.stopPropagation()" style="background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:420px;width:92%;max-height:80vh;overflow-y:auto"><div class="flex justify-between items-center mb-3"><h3 class="text-base font-semibold">${title}</h3><button onclick="closeModal()" class="text-[#555] hover:text-white text-lg leading-none" aria-label="关闭">&times;</button></div>${content}</div></div>`;
+    }
 
     function openModal(type){const ct=document.getElementById('modal-container');let title='',content='';if(type==='techniques'){title='提示词核心技术';content=`<div class="space-y-2 text-xs text-[#909098]"><div><strong class="text-[#ccc]">DNA预设 + 8维度</strong><br>选预设→自动填满8维度→逐项微调。镜头·胶片·灯光·调色·构图·质感·氛围·时代独立可选。</div><div><strong class="text-[#ccc]">物理光学优先</strong><br>35mm/50mm/85mm/100mm/变形宽银幕/IMAX——具体镜头语言远超形容词。</div><div><strong class="text-[#ccc]">真实胶片</strong><br>Portra 400/Cinestill 800T/Vision3/Tri-X——每种胶片的色彩科学和颗粒特性不同。</div><div><strong class="text-[#ccc]">SREF代码</strong><br>Midjourney风格参考代码，promptsref.com最高排名验证。</div><div><strong class="text-[#ccc]">反推引擎</strong><br>@erenturkmen精英级跨平台反推系统提示词。</div></div>`;}else{title='研究来源';content=`<div class="space-y-2 text-xs text-[#909098]"><div><strong class="text-[#ccc]">电影摄影</strong><br>designhero.tv, Promptsera Cinematic Realism Blueprint, X摄影师社区。</div><div><strong class="text-[#ccc]">SREF</strong><br>promptsref.com, @promptsref每日更新。</div><div><strong class="text-[#ccc]">反推模板</strong><br>@erenturkmen — 1,534赞·3,340书签·181,437浏览。</div></div>`;}ct.innerHTML=`<div class="modal-overlay" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-label="${title}" style="display:flex;align-items:center;justify-content:center;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:100;animation:fadeIn 0.15s ease"><div class="modal-box" onclick="event.stopPropagation()" style="background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:480px;width:92%;max-height:80vh;overflow-y:auto"><div class="flex justify-between items-center mb-3"><h3 class="text-base font-semibold">${title}</h3><button onclick="closeModal()" class="text-[#555] hover:text-white text-lg leading-none" aria-label="关闭">&times;</button></div>${content}</div></div>`;}
     function closeModal(e){if(e&&e.target!==e.currentTarget)return;document.getElementById('modal-container').innerHTML='';}

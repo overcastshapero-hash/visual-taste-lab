@@ -11,133 +11,156 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
-
     :root {
-      --bg: #08080b; --panel: #0f0f13; --border: #1e1e24;
-      --text: #d4d4da; --muted: #737380;
-      --gold: #b8935a; --gold-dim: #8a6d3f;
-      --accent2: #5a8a9a;
+      --bg: #f5f5f7;
+      --panel: rgba(255,255,255,0.85);
+      --border: rgba(0,0,0,0.08);
+      --text: #1d1d1f; --muted: #6e6e73; --faint: #86868b;
+      --accent: #0071e3; --accent-dim: #0077ed;
+      --glass: rgba(255,255,255,0.55);
+      --glass-strong: rgba(255,255,255,0.72);
+      --glass-border: rgba(255,255,255,0.7);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bg); color: var(--text);
-      min-height: 100vh; -webkit-font-smoothing: antialiased;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Helvetica Neue", system-ui, sans-serif;
+      color: var(--text);
+      min-height: 100vh; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+      background:
+        radial-gradient(ellipse 80% 50% at 12% -5%, rgba(0,113,227,0.10), transparent 60%),
+        radial-gradient(ellipse 70% 50% at 92% 8%, rgba(255,55,95,0.07), transparent 55%),
+        radial-gradient(ellipse 60% 55% at 50% 105%, rgba(120,90,255,0.07), transparent 60%),
+        var(--bg);
+      background-attachment: fixed;
     }
 
     /* ===== DNA PRESET CARDS ===== */
     .dna-preset {
-      background: var(--panel); border: 1px solid var(--border);
-      border-radius: 16px; overflow: hidden; cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.23,1,0.32,1);
+      background: var(--glass);
+      -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px; overflow: hidden; cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.23,1,0.32,1);
       width: 180px; flex-shrink: 0; position: relative;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8);
     }
-    .dna-preset:hover { transform: translateY(-2px); border-color: #444; box-shadow: 0 10px 30px -12px rgba(0,0,0,0.5); }
-    .dna-preset.active { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(184,147,90,0.25); }
+    .dna-preset:hover { transform: translateY(-3px); box-shadow: 0 14px 40px -8px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.9); }
+    .dna-preset.active { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,113,227,0.18), 0 10px 30px -10px rgba(0,113,227,0.3); }
     .dna-preset.active::after {
       content: '✓'; position: absolute; top: 8px; right: 8px; z-index: 10;
-      width: 22px; height: 22px; background: var(--gold); color: #0f0f13;
+      width: 22px; height: 22px; background: var(--accent); color: #fff;
       border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 700;
+      font-size: 11px; font-weight: 700; box-shadow: 0 2px 8px rgba(0,113,227,0.4);
     }
     .dna-preview { width: 100%; aspect-ratio: 16/9; position: relative; overflow: hidden; }
 
     /* ===== DIMENSION ROW ===== */
     .dim-row {
       display: flex; align-items: flex-start; gap: 10px;
-      padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
+      padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.06);
     }
     .dim-label {
       flex-shrink: 0; width: 90px; padding-top: 4px;
     }
-    .dim-label .icon { font-size: 12px; color: var(--gold); margin-bottom: 1px; }
-    .dim-label .name { font-size: 11px; font-weight: 600; color: #aaa; }
-    .dim-label .sub  { font-size: 8px; color: #555; letter-spacing: 0.5px; }
+    .dim-label .icon { font-size: 12px; color: var(--accent); margin-bottom: 1px; }
+    .dim-label .name { font-size: 11px; font-weight: 600; color: var(--text); display: inline-flex; align-items: center; }
+    .dim-label .sub  { font-size: 8px; color: var(--faint); letter-spacing: 0.5px; }
     .dim-options { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; }
 
     .opt-chip {
       display: flex; align-items: center; gap: 5px;
-      padding: 5px 10px; border-radius: 8px;
-      background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06);
-      cursor: pointer; transition: all 0.12s; font-size: 11px;
-      white-space: nowrap; user-select: none;
+      padding: 5px 10px; border-radius: 980px;
+      background: rgba(255,255,255,0.6);
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      border: 1px solid rgba(0,0,0,0.08);
+      cursor: pointer; transition: all 0.18s; font-size: 11px;
+      white-space: nowrap; user-select: none; color: var(--text);
     }
-    .opt-chip:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.12); }
-    .opt-chip.selected { background: rgba(184,147,90,0.1); border-color: var(--gold); color: var(--gold); }
+    .opt-chip:hover { background: rgba(255,255,255,0.95); border-color: rgba(0,0,0,0.15); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .opt-chip.selected { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 2px 10px rgba(0,113,227,0.3); }
+    .opt-chip.selected .opt-swatch { border-color: rgba(255,255,255,0.6); }
     .why-dot {
       display: inline-flex; align-items: center; justify-content: center;
       width: 13px; height: 13px; margin-left: 4px; border-radius: 50%;
       font-size: 8px; font-weight: 700; line-height: 1; cursor: help;
-      color: #888; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      color: var(--muted); background: rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.1);
       transition: all 0.12s; flex-shrink: 0;
     }
-    .why-dot:hover { color: var(--gold); border-color: var(--gold); background: rgba(184,147,90,0.12); }
-    .dim-label .name { display: inline-flex; align-items: center; }
-    .opt-swatch { width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.08); }
+    .why-dot:hover { color: #fff; border-color: var(--accent); background: var(--accent); }
+    .opt-chip.selected .why-dot { color: #fff; background: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.45); }
+    .opt-swatch { width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.12); }
 
-    /* ===== PANELS ===== */
-    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; }
+    /* ===== LIQUID GLASS PANELS ===== */
+    .panel {
+      background: var(--glass);
+      -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%);
+      border: 1px solid var(--glass-border); border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.85);
+    }
 
     .btn-primary {
-      background: linear-gradient(145deg, var(--gold), var(--gold-dim));
-      color: #0f0f13; font-weight: 700; border: none;
-      border-radius: 12px; padding: 12px 24px; cursor: pointer; transition: all 0.2s; font-size: 14px;
+      background: var(--accent); color: #fff; font-weight: 600; border: none;
+      border-radius: 980px; padding: 12px 26px; cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.23,1,0.32,1); font-size: 14px;
+      box-shadow: 0 4px 16px rgba(0,113,227,0.3);
     }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(184,147,90,0.2); }
+    .btn-primary:hover { background: var(--accent-dim); transform: translateY(-1px) scale(1.01); box-shadow: 0 8px 24px rgba(0,113,227,0.4); }
     .btn-ghost {
-      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
-      color: var(--text); border-radius: 8px; padding: 6px 12px;
-      font-size: 11px; cursor: pointer; transition: all 0.15s;
+      background: rgba(255,255,255,0.6); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+      border: 1px solid rgba(0,0,0,0.1);
+      color: var(--text); border-radius: 980px; padding: 6px 14px;
+      font-size: 11px; cursor: pointer; transition: all 0.18s;
     }
-    .btn-ghost:hover { background: rgba(255,255,255,0.06); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.98); box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
 
     .prompt-mono {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
       font-size: 12px; line-height: 1.7;
     }
-    :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
     .toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-      background: var(--panel); border: 1px solid var(--border);
-      padding: 10px 22px; border-radius: 12px; font-size: 12px; z-index: 200;
-      animation: tIn 0.2s ease;
+      background: var(--glass-strong);
+      -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%);
+      border: 1px solid var(--glass-border); color: var(--text);
+      padding: 10px 22px; border-radius: 980px; font-size: 12px; z-index: 200;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12); animation: tIn 0.2s ease;
     }
     @keyframes tIn { from { opacity:0; transform:translateX(-50%) translateY(6px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
 
     .section-label { font-size: 9px; letter-spacing: 2px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
 
     .drop-zone {
-      border: 2px dashed rgba(255,255,255,0.12); border-radius: 12px;
+      border: 2px dashed rgba(0,0,0,0.15); border-radius: 14px;
       padding: 18px; text-align: center; transition: all 0.2s; cursor: pointer;
     }
-    .drop-zone:hover, .drop-zone.dragover { border-color: var(--gold); background: rgba(184,147,90,0.04); }
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(0,113,227,0.05); }
 
-    .palette-swatch { width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
+    .palette-swatch { width: 24px; height: 24px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); }
 
     .copy-template {
-      background: #0a0a10; border: 1px solid var(--border);
-      border-radius: 10px; padding: 12px; font-size: 10.5px;
-      line-height: 1.65; color: #a0a0b0; max-height: 160px; overflow-y: auto;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 12px; padding: 12px; font-size: 10.5px;
+      line-height: 1.65; color: #515154; max-height: 160px; overflow-y: auto;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
       white-space: pre-wrap; position: relative;
     }
     .copy-template-btn {
       position: absolute; top: 6px; right: 6px;
-      padding: 4px 9px; font-size: 9px; border-radius: 6px;
-      background: var(--accent2); color: white; border: none; cursor: pointer; font-weight: 600;
+      padding: 4px 9px; font-size: 9px; border-radius: 980px;
+      background: var(--accent); color: white; border: none; cursor: pointer; font-weight: 600;
     }
 
     .sref-chip {
       display: inline-flex; align-items: center; gap: 4px;
-      padding: 4px 8px; border-radius: 6px;
-      background: rgba(90,138,154,0.06); border: 1px solid rgba(90,138,154,0.15);
-      font-size: 10px; cursor: pointer; transition: all 0.12s;
+      padding: 4px 10px; border-radius: 980px;
+      background: rgba(0,113,227,0.06); border: 1px solid rgba(0,113,227,0.18);
+      font-size: 10px; cursor: pointer; transition: all 0.15s; color: var(--text);
     }
-    .sref-chip:hover { background: rgba(90,138,154,0.12); }
-    .sref-chip.selected { background: rgba(90,138,154,0.18); border-color: var(--accent2); color: var(--accent2); }
+    .sref-chip:hover { background: rgba(0,113,227,0.12); }
+    .sref-chip.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
 
     /* ==================== DNA CSS PREVIEWS ==================== */
     .dp-deakins { background: linear-gradient(160deg, #708090 0%, #8b9aaa 25%, #a3b5c4 50%, #c5b8a8 75%, #b8a590 100%); }
@@ -252,15 +275,15 @@
 </head>
 <body>
 
-  <header class="border-b border-white/10 bg-[#08080b]/95 backdrop-blur sticky top-0 z-50">
+  <header class="border-b border-black/[0.08] bg-white/70 backdrop-blur sticky top-0 z-50">
     <div class="max-w-[1500px] mx-auto px-6 h-14 flex items-center justify-between">
       <div class="flex items-center gap-x-3">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#b8935a] to-[#7a5a30] flex items-center justify-center">
-          <i class="fa-solid fa-sliders text-[#0f0f13] text-sm"></i>
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0071e3] to-[#42a5f5] flex items-center justify-center">
+          <i class="fa-solid fa-sliders text-white text-sm"></i>
         </div>
         <div>
           <div class="font-semibold tracking-tight text-base">Visual Taste Lab</div>
-          <div class="text-[9px] text-[#b8935a] -mt-0.5 tracking-[2px]">审美模块化 Prompt 锻造台</div>
+          <div class="text-[9px] text-[#0071e3] -mt-0.5 tracking-[2px]">审美训练台 · 给你一双眼睛</div>
         </div>
       </div>
       <div class="flex items-center gap-x-2 text-[11px]">
@@ -275,9 +298,9 @@
     <!-- HERO -->
     <section class="mb-5">
       <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mb-3">
-        <span class="text-[10px] tracking-[1.5px] px-2.5 py-1 rounded-full bg-white/5 text-[#b8935a] border border-white/5">DNA 预设 + 8 维度</span>
-        <span class="text-[10px] tracking-[1.5px] px-2.5 py-1 rounded-full bg-white/5 text-[#5a8a9a] border border-white/5">MJ SREF</span>
-        <span class="text-[10px] tracking-[1.5px] px-2.5 py-1 rounded-full bg-white/5 text-[#737380] border border-white/5">反推引擎</span>
+        <span class="text-[10px] tracking-[1.5px] px-2.5 py-1 rounded-full bg-black/[0.04] text-[#0071e3] border border-black/[0.06]">DNA 预设 + 8 维度</span>
+        <span class="text-[10px] tracking-[1.5px] px-2.5 py-1 rounded-full bg-black/[0.04] text-[#5a8a9a] border border-black/[0.06]">MJ SREF</span>
+        <span class="text-[10px] tracking-[1.5px] px-2.5 py-1 rounded-full bg-black/[0.04] text-[#737380] border border-black/[0.06]">反推引擎</span>
       </div>
       <h1 class="text-2xl sm:text-3xl tracking-tight font-semibold leading-tight mb-2">
         AI 给你一张图。这里给你一双眼睛。
@@ -297,8 +320,8 @@
         </div>
         <div class="panel p-4" style="border-left:3px solid rgba(184,147,90,0.5)" id="hero-live-panel">
           <div class="flex items-center gap-x-2 mb-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#b8935a]" id="hero-dot"></span>
-            <div class="text-[10px] tracking-[1.5px] text-[#b8935a] font-semibold">用这个造出来的（实时）</div>
+            <span class="w-1.5 h-1.5 rounded-full bg-[#0071e3]" id="hero-dot"></span>
+            <div class="text-[10px] tracking-[1.5px] text-[#0071e3] font-semibold">用这个造出来的（实时）</div>
           </div>
           <div id="hero-live-text" class="prompt-mono text-[11px] text-[#909098] leading-relaxed" style="min-height:20px">
             选择下方的 DNA 预设或维度选项，这里会实时显示你正在构建的 Prompt。
@@ -334,7 +357,7 @@
     <section class="panel p-5 mb-6">
       <div class="section-label mb-2">步骤 4：主体描述 + 图片输入</div>
       <textarea id="subject" rows="3"
-        class="w-full bg-[#141418] border border-white/10 focus:border-[#b8935a]/40 rounded-xl px-4 py-3 text-sm placeholder:text-[#555] resize-none"
+        class="w-full bg-white/70 border border-black/[0.08] focus:border-[#0071e3]/50 rounded-xl px-4 py-3 text-sm placeholder:text-[#555] resize-none"
         placeholder="你想生成的画面……"
         aria-label="主体与场景描述"></textarea>
 
@@ -375,13 +398,13 @@
     <!-- ===== OUTPUT ===== -->
     <section id="output" class="hidden">
       <div class="panel overflow-hidden">
-        <div class="px-6 pt-5 pb-3 bg-black/30 flex flex-wrap items-center justify-between gap-3 border-b border-white/10">
+        <div class="px-6 pt-5 pb-3 bg-black/30 flex flex-wrap items-center justify-between gap-3 border-b border-black/[0.08]">
           <div>
-            <div class="text-[#b8935a] text-[10px] tracking-[2px]">PROMPT READY</div>
+            <div class="text-[#0071e3] text-[10px] tracking-[2px]">PROMPT READY</div>
             <h2 class="text-lg font-semibold">可直接用于 Flux / Midjourney V7 / SD3</h2>
           </div>
           <div class="flex flex-wrap gap-2">
-            <button onclick="copyPrompt()" class="px-4 py-2 rounded-xl bg-[#b8935a] text-[#0f0f13] font-bold flex items-center gap-x-1.5 text-xs">
+            <button onclick="copyPrompt()" class="px-4 py-2 rounded-xl bg-[#0071e3] text-white font-bold flex items-center gap-x-1.5 text-xs">
               <i class="fa-solid fa-copy"></i> 复制
             </button>
             <button onclick="copyForModel('flux')" class="btn-ghost text-[10px] py-1.5">Flux</button>
@@ -392,7 +415,7 @@
           <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
             <div class="lg:col-span-2">
               <div class="section-label mb-2">调色板</div>
-              <div class="rounded-xl overflow-hidden border border-white/10 aspect-video bg-black">
+              <div class="rounded-xl overflow-hidden border border-black/[0.08] aspect-video bg-black">
                 <canvas id="preview-canvas" class="w-full h-full"></canvas>
               </div>
               <div id="palette-display" class="flex gap-1.5 mt-2 flex-wrap"></div>
@@ -402,13 +425,13 @@
                 <div class="section-label">Prompt</div>
                 <button onclick="copyPrompt()" class="btn-ghost text-[10px] py-1">复制</button>
               </div>
-              <div id="full-prompt" class="prompt-mono bg-[#08080b] border border-white/10 p-4 rounded-xl text-[#c0c0c8] whitespace-pre-wrap max-h-[260px] overflow-auto select-all" role="textbox" tabindex="0"></div>
+              <div id="full-prompt" class="prompt-mono bg-black/[0.03] border border-black/[0.08] p-4 rounded-xl text-[#424245] whitespace-pre-wrap max-h-[260px] overflow-auto select-all" role="textbox" tabindex="0"></div>
 
               <!-- VARIANT TABS -->
               <div id="variant-tabs" class="hidden flex gap-1.5 mt-2">
-                <button onclick="switchVariant(0)" id="vtab-0" class="text-[10px] px-2.5 py-1 rounded-lg bg-[#b8935a]/15 border border-[#b8935a]/30 text-[#b8935a] font-semibold">精确版</button>
-                <button onclick="switchVariant(1)" id="vtab-1" class="text-[10px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[#888]">更大胆</button>
-                <button onclick="switchVariant(2)" id="vtab-2" class="text-[10px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[#888]">更克制</button>
+                <button onclick="switchVariant(0)" id="vtab-0" class="text-[10px] px-2.5 py-1 rounded-lg bg-[#0071e3]/15 border border-[#0071e3]/30 text-[#0071e3] font-semibold">精确版</button>
+                <button onclick="switchVariant(1)" id="vtab-1" class="text-[10px] px-2.5 py-1 rounded-lg bg-black/[0.04] border border-black/[0.08] text-[#888]">更大胆</button>
+                <button onclick="switchVariant(2)" id="vtab-2" class="text-[10px] px-2.5 py-1 rounded-lg bg-black/[0.04] border border-black/[0.08] text-[#888]">更克制</button>
               </div>
 
               <div id="sref-display" class="hidden mt-2"></div>
@@ -685,8 +708,8 @@ Source: @erenturkmen — ❤1,534 · 🔖3,340 · 👁181k`;
              onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();applyPreset('${p.id}')}">
           <div class="dna-preview ${p.cssClass}"></div>
           <div class="p-3">
-            <div class="text-white font-semibold text-xs">${p.name}</div>
-            <div class="text-[#b8935a] text-[10px] mt-0.5">${p.nameEn}</div>
+            <div class="text-[#1d1d1f] font-semibold text-xs">${p.name}</div>
+            <div class="text-[#0071e3] text-[10px] mt-0.5">${p.nameEn}</div>
             <div class="text-[10px] text-[#737380] mt-1.5">${p.desc}</div>
             <div class="text-[9px] text-[#555] mt-1">${p.director}</div>
           </div>
@@ -799,14 +822,14 @@ Source: @erenturkmen — ❤1,534 · 🔖3,340 · 👁181k`;
       }
       const preview = buildPrompt('[你的主体描述]');
       el.textContent = preview;
-      el.style.color = '#c0c0c8';
-      dot.style.background = '#b8935a';
+      el.style.color = '#424245';
+      dot.style.background = '#0071e3';
       const parts = [];
       if (activePresetId) { const p = DNA_PRESETS.find(x=>x.id===activePresetId); parts.push(p?.name); }
       if (selCount) parts.push(`${selCount}/8 维度`);
       if (selectedSREFs.length) parts.push(`${selectedSREFs.length} SREF`);
       tag.textContent = '→ ' + (parts.join(' · ') || '自定义配置') + ' · 精确 · 可复现';
-      tag.style.color = '#b8935a';
+      tag.style.color = '#0071e3';
     }
 
     // ==================== IMAGE UPLOAD ====================
@@ -848,7 +871,7 @@ Source: @erenturkmen — ❤1,534 · 🔖3,340 · 👁181k`;
 
     function renderMoodboardPreview() {
       document.getElementById('moodboard-count').textContent=`(${moodboardImages.length} 张)`;
-      document.getElementById('moodboard-preview').innerHTML=moodboardImages.map((img,i)=>`<div class="relative"><img src="${img.data}" class="w-14 h-14 object-cover rounded-lg border border-white/10"><button onclick="removeMoodboardImage(${i})" class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#333] text-[9px] flex items-center justify-center hover:bg-red-600" aria-label="移除">&times;</button></div>`).join('');
+      document.getElementById('moodboard-preview').innerHTML=moodboardImages.map((img,i)=>`<div class="relative"><img src="${img.data}" class="w-14 h-14 object-cover rounded-lg border border-black/[0.08]"><button onclick="removeMoodboardImage(${i})" class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#333] text-[9px] flex items-center justify-center hover:bg-red-600" aria-label="移除">&times;</button></div>`).join('');
     }
 
     function removeMoodboardImage(i) {
@@ -877,13 +900,13 @@ Source: @erenturkmen — ❤1,534 · 🔖3,340 · 👁181k`;
         const avgB=palette.slice(0,3).reduce((s,c)=>s+c.b,0)/Math.min(3,palette.length);
         refImageAnalysis={palette,avgLuminance:tl/pc,avgSaturation:ts/pc,temperature:avgR/Math.max(1,avgB)>1.15?'warm':avgR/Math.max(1,avgB)<0.85?'cool':'neutral',brightness:tl/pc>160?'bright':tl/pc>90?'mid':'dark'};
         document.getElementById('image-analysis').classList.remove('hidden');
-        document.getElementById('image-analysis').innerHTML=`<div class="panel p-3"><div class="flex items-center justify-between mb-2"><div class="text-[11px] font-semibold text-[#b8935a]">图片分析</div></div><div class="flex flex-wrap items-center gap-x-3 gap-y-1.5"><div class="flex items-center gap-x-1">${refImageAnalysis.palette.map(c=>`<span class="palette-swatch" style="background:${c.hex};width:22px;height:22px" title="${c.hex}"></span>`).join('')}</div><span class="text-[9px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10">色温:${refImageAnalysis.temperature==='warm'?'暖':refImageAnalysis.temperature==='cool'?'冷':'中'}</span><span class="text-[9px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10">亮度:${refImageAnalysis.brightness}</span><span class="text-[9px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10">饱和:${(refImageAnalysis.avgSaturation*100).toFixed(0)}%</span></div></div>`;
+        document.getElementById('image-analysis').innerHTML=`<div class="panel p-3"><div class="flex items-center justify-between mb-2"><div class="text-[11px] font-semibold text-[#0071e3]">图片分析</div></div><div class="flex flex-wrap items-center gap-x-3 gap-y-1.5"><div class="flex items-center gap-x-1">${refImageAnalysis.palette.map(c=>`<span class="palette-swatch" style="background:${c.hex};width:22px;height:22px" title="${c.hex}"></span>`).join('')}</div><span class="text-[9px] px-2 py-0.5 rounded-full bg-black/[0.04] border border-black/[0.08]">色温:${refImageAnalysis.temperature==='warm'?'暖':refImageAnalysis.temperature==='cool'?'冷':'中'}</span><span class="text-[9px] px-2 py-0.5 rounded-full bg-black/[0.04] border border-black/[0.08]">亮度:${refImageAnalysis.brightness}</span><span class="text-[9px] px-2 py-0.5 rounded-full bg-black/[0.04] border border-black/[0.08]">饱和:${(refImageAnalysis.avgSaturation*100).toFixed(0)}%</span></div></div>`;
       };img.src=dataUrl;
     }
 
     function analyzeMoodboard() {
       if(moodboardImages.length<2)return;const analyses=[];let done=0;
-      moodboardImages.forEach(img=>{const image=new Image();image.onload=()=>{const c=document.createElement('canvas'),ctx=c.getContext('2d');const s=Math.min(100/image.width,100/image.height);c.width=image.width*s;c.height=image.height*s;ctx.drawImage(image,0,0,c.width,c.height);const d=ctx.getImageData(0,0,c.width,c.height).data;let tl=0,ts=0,ct=0;for(let i=0;i<d.length;i+=4){const r=d[i],g=d[i+1],b=d[i+2];tl+=0.299*r+0.587*g+0.114*b;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);ts+=mx===0?0:(mx-mn)/mx;ct++;}analyses.push({avgLum:tl/ct,avgSat:ts/ct});done++;if(done===moodboardImages.length){const lums=analyses.map(a=>a.avgLum),sats=analyses.map(a=>a.avgSat);const ml=lums.reduce((sv,v)=>sv+v,0)/lums.length,ms=sats.reduce((sv,v)=>sv+v,0)/sats.length;const lr=Math.max(...lums)-Math.min(...lums),sr=Math.max(...sats)-Math.min(...sats);moodboardAnalysis={avgLuminance:ml,avgSaturation:ms,brightnessCategory:ml>150?'bright':ml>80?'mid':'dark',saturationCategory:ms>0.3?'saturated':ms>0.1?'moderate':'desaturated',consistency:lr<30&&sr<0.15?'高':lr<60?'中':'低'};const ctr=document.getElementById('moodboard-analysis');ctr.classList.remove('hidden');ctr.innerHTML=`<div class="panel p-3"><div class="text-[11px] font-semibold text-[#b8935a] mb-1.5">Moodboard 共性</div><div class="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-[#909098]"><span>亮度:${moodboardAnalysis.brightnessCategory}</span><span>饱和:${moodboardAnalysis.saturationCategory}</span><span>一致性:${moodboardAnalysis.consistency}</span></div></div>`;}};image.src=img.data;});
+      moodboardImages.forEach(img=>{const image=new Image();image.onload=()=>{const c=document.createElement('canvas'),ctx=c.getContext('2d');const s=Math.min(100/image.width,100/image.height);c.width=image.width*s;c.height=image.height*s;ctx.drawImage(image,0,0,c.width,c.height);const d=ctx.getImageData(0,0,c.width,c.height).data;let tl=0,ts=0,ct=0;for(let i=0;i<d.length;i+=4){const r=d[i],g=d[i+1],b=d[i+2];tl+=0.299*r+0.587*g+0.114*b;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);ts+=mx===0?0:(mx-mn)/mx;ct++;}analyses.push({avgLum:tl/ct,avgSat:ts/ct});done++;if(done===moodboardImages.length){const lums=analyses.map(a=>a.avgLum),sats=analyses.map(a=>a.avgSat);const ml=lums.reduce((sv,v)=>sv+v,0)/lums.length,ms=sats.reduce((sv,v)=>sv+v,0)/sats.length;const lr=Math.max(...lums)-Math.min(...lums),sr=Math.max(...sats)-Math.min(...sats);moodboardAnalysis={avgLuminance:ml,avgSaturation:ms,brightnessCategory:ml>150?'bright':ml>80?'mid':'dark',saturationCategory:ms>0.3?'saturated':ms>0.1?'moderate':'desaturated',consistency:lr<30&&sr<0.15?'高':lr<60?'中':'低'};const ctr=document.getElementById('moodboard-analysis');ctr.classList.remove('hidden');ctr.innerHTML=`<div class="panel p-3"><div class="text-[11px] font-semibold text-[#0071e3] mb-1.5">Moodboard 共性</div><div class="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-[#909098]"><span>亮度:${moodboardAnalysis.brightnessCategory}</span><span>饱和:${moodboardAnalysis.saturationCategory}</span><span>一致性:${moodboardAnalysis.consistency}</span></div></div>`;}};image.src=img.data;});
     }
 
     // ==================== FORGE ====================
@@ -917,7 +940,7 @@ Source: @erenturkmen — ❤1,534 · 🔖3,340 · 👁181k`;
       document.getElementById('output').classList.remove('hidden');
       document.getElementById('variant-tabs').classList.remove('hidden');
       const sd=document.getElementById('sref-display');
-      if(selectedSREFs.length){sd.classList.remove('hidden');sd.innerHTML=selectedSREFs.map(s=>`<div class="flex items-center gap-x-2 text-xs text-[#5a8a9a] font-mono"><span>--sref ${s.code} --v 7 --sv6</span><button onclick="navigator.clipboard.writeText('--sref ${s.code} --v 7 --sv6').then(()=>showToast('已复制'))" class="text-[9px] px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10">复制</button></div>`).join('');}else{sd.classList.add('hidden');}
+      if(selectedSREFs.length){sd.classList.remove('hidden');sd.innerHTML=selectedSREFs.map(s=>`<div class="flex items-center gap-x-2 text-xs text-[#5a8a9a] font-mono"><span>--sref ${s.code} --v 7 --sv6</span><button onclick="navigator.clipboard.writeText('--sref ${s.code} --v 7 --sv6').then(()=>showToast('已复制'))" class="text-[9px] px-1.5 py-0.5 rounded bg-black/[0.04] hover:bg-black/[0.06]">复制</button></div>`).join('');}else{sd.classList.add('hidden');}
       renderColorPreview();renderSelectionBreakdown();document.getElementById('output').scrollIntoView({behavior:'smooth'});
     }
 
@@ -928,9 +951,9 @@ Source: @erenturkmen — ❤1,534 · 🔖3,340 · 👁181k`;
         const tab = document.getElementById('vtab-'+i);
         if(!tab) continue;
         if(i===idx){
-          tab.className = 'text-[10px] px-2.5 py-1 rounded-lg bg-[#b8935a]/15 border border-[#b8935a]/30 text-[#b8935a] font-semibold';
+          tab.className = 'text-[10px] px-2.5 py-1 rounded-lg bg-[#0071e3]/15 border border-[#0071e3]/30 text-[#0071e3] font-semibold';
         } else {
-          tab.className = 'text-[10px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[#888]';
+          tab.className = 'text-[10px] px-2.5 py-1 rounded-lg bg-black/[0.04] border border-black/[0.08] text-[#888]';
         }
       }
     }
@@ -1008,9 +1031,9 @@ Source: @erenturkmen — ❤1,534 · 🔖3,340 · 👁181k`;
 
     function renderSelectionBreakdown() {
       const items=[];const preset=activePresetId?DNA_PRESETS.find(p=>p.id===activePresetId):null;
-      if(preset)items.push(`<span class="px-2 py-1 rounded-lg bg-[#b8935a]/10 border border-[#b8935a]/20 text-[#b8935a] text-xs font-semibold">${preset.name}</span>`);
-      DIMENSIONS.forEach(dim=>{if(selections[dim.id]){const opt=dim.options.find(o=>o.id===selections[dim.id]);if(opt)items.push(`<span class="px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-[#ccc] text-[10px]"><span class="text-[#b8935a]">${dim.label}</span> ${opt.label}</span>`);}});
-      if(selectedSREFs.length)items.push(`<span class="px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-[#5a8a9a] text-[10px]" style="border-color:rgba(90,138,154,0.3)">SREF ${selectedSREFs.map(s=>s.code).join(', ')}</span>`);
+      if(preset)items.push(`<span class="px-2 py-1 rounded-lg bg-[#0071e3]/10 border border-[#0071e3]/20 text-[#0071e3] text-xs font-semibold">${preset.name}</span>`);
+      DIMENSIONS.forEach(dim=>{if(selections[dim.id]){const opt=dim.options.find(o=>o.id===selections[dim.id]);if(opt)items.push(`<span class="px-2 py-1 rounded-lg bg-black/[0.04] border border-black/[0.08] text-[#1d1d1f] text-[10px]"><span class="text-[#0071e3]">${dim.label}</span> ${opt.label}</span>`);}});
+      if(selectedSREFs.length)items.push(`<span class="px-2 py-1 rounded-lg bg-black/[0.04] border border-black/[0.08] text-[#5a8a9a] text-[10px]" style="border-color:rgba(90,138,154,0.3)">SREF ${selectedSREFs.map(s=>s.code).join(', ')}</span>`);
       document.getElementById('selection-breakdown').innerHTML=items.join(' ')||'<span class="text-[#555] text-[10px]">无特别选择，使用默认 Prompt 模板</span>';
     }
 
@@ -1026,12 +1049,12 @@ Source: @erenturkmen — ❤1,534 · 🔖3,340 · 👁181k`;
       const optWhy = optId ? (WHY[optId]||'') : '';
       const title = opt ? `${dim.label} · ${opt.label}` : `${dim.label} — 这个维度在控制什么`;
       let content = '';
-      if(dimWhy) content += `<div class="${optWhy?'mb-3':''}"><div class="text-[10px] uppercase tracking-wider text-[#b8935a] mb-1">这个维度在控制什么</div><div class="text-[13px] text-[#c0c0c8] leading-relaxed">${dimWhy}</div></div>`;
-      if(optWhy) content += `<div><div class="text-[10px] uppercase tracking-wider text-[#5a8a9a] mb-1">为什么「${opt.label}」有效</div><div class="text-[13px] text-[#c0c0c8] leading-relaxed">${optWhy}</div></div>`;
-      document.getElementById('modal-container').innerHTML=`<div class="modal-overlay" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-label="${title}" style="display:flex;align-items:center;justify-content:center;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:100;animation:fadeIn 0.15s ease"><div class="modal-box" onclick="event.stopPropagation()" style="background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:420px;width:92%;max-height:80vh;overflow-y:auto"><div class="flex justify-between items-center mb-3"><h3 class="text-base font-semibold">${title}</h3><button onclick="closeModal()" class="text-[#555] hover:text-white text-lg leading-none" aria-label="关闭">&times;</button></div>${content}</div></div>`;
+      if(dimWhy) content += `<div class="${optWhy?'mb-3':''}"><div class="text-[10px] uppercase tracking-wider text-[#0071e3] mb-1">这个维度在控制什么</div><div class="text-[13px] text-[#424245] leading-relaxed">${dimWhy}</div></div>`;
+      if(optWhy) content += `<div><div class="text-[10px] uppercase tracking-wider text-[#5a8a9a] mb-1">为什么「${opt.label}」有效</div><div class="text-[13px] text-[#424245] leading-relaxed">${optWhy}</div></div>`;
+      document.getElementById('modal-container').innerHTML=`<div class="modal-overlay" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-label="${title}" style="display:flex;align-items:center;justify-content:center;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:100;animation:fadeIn 0.15s ease"><div class="modal-box" onclick="event.stopPropagation()" style="background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:420px;width:92%;max-height:80vh;overflow-y:auto"><div class="flex justify-between items-center mb-3"><h3 class="text-base font-semibold">${title}</h3><button onclick="closeModal()" class="text-[#555] hover:text-[#1d1d1f] text-lg leading-none" aria-label="关闭">&times;</button></div>${content}</div></div>`;
     }
 
-    function openModal(type){const ct=document.getElementById('modal-container');let title='',content='';if(type==='techniques'){title='提示词核心技术';content=`<div class="space-y-2 text-xs text-[#909098]"><div><strong class="text-[#ccc]">DNA预设 + 8维度</strong><br>选预设→自动填满8维度→逐项微调。镜头·胶片·灯光·调色·构图·质感·氛围·时代独立可选。</div><div><strong class="text-[#ccc]">物理光学优先</strong><br>35mm/50mm/85mm/100mm/变形宽银幕/IMAX——具体镜头语言远超形容词。</div><div><strong class="text-[#ccc]">真实胶片</strong><br>Portra 400/Cinestill 800T/Vision3/Tri-X——每种胶片的色彩科学和颗粒特性不同。</div><div><strong class="text-[#ccc]">SREF代码</strong><br>Midjourney风格参考代码，promptsref.com最高排名验证。</div><div><strong class="text-[#ccc]">反推引擎</strong><br>@erenturkmen精英级跨平台反推系统提示词。</div></div>`;}else{title='研究来源';content=`<div class="space-y-2 text-xs text-[#909098]"><div><strong class="text-[#ccc]">电影摄影</strong><br>designhero.tv, Promptsera Cinematic Realism Blueprint, X摄影师社区。</div><div><strong class="text-[#ccc]">SREF</strong><br>promptsref.com, @promptsref每日更新。</div><div><strong class="text-[#ccc]">反推模板</strong><br>@erenturkmen — 1,534赞·3,340书签·181,437浏览。</div></div>`;}ct.innerHTML=`<div class="modal-overlay" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-label="${title}" style="display:flex;align-items:center;justify-content:center;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:100;animation:fadeIn 0.15s ease"><div class="modal-box" onclick="event.stopPropagation()" style="background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:480px;width:92%;max-height:80vh;overflow-y:auto"><div class="flex justify-between items-center mb-3"><h3 class="text-base font-semibold">${title}</h3><button onclick="closeModal()" class="text-[#555] hover:text-white text-lg leading-none" aria-label="关闭">&times;</button></div>${content}</div></div>`;}
+    function openModal(type){const ct=document.getElementById('modal-container');let title='',content='';if(type==='techniques'){title='提示词核心技术';content=`<div class="space-y-2 text-xs text-[#909098]"><div><strong class="text-[#1d1d1f]">DNA预设 + 8维度</strong><br>选预设→自动填满8维度→逐项微调。镜头·胶片·灯光·调色·构图·质感·氛围·时代独立可选。</div><div><strong class="text-[#1d1d1f]">物理光学优先</strong><br>35mm/50mm/85mm/100mm/变形宽银幕/IMAX——具体镜头语言远超形容词。</div><div><strong class="text-[#1d1d1f]">真实胶片</strong><br>Portra 400/Cinestill 800T/Vision3/Tri-X——每种胶片的色彩科学和颗粒特性不同。</div><div><strong class="text-[#1d1d1f]">SREF代码</strong><br>Midjourney风格参考代码，promptsref.com最高排名验证。</div><div><strong class="text-[#1d1d1f]">反推引擎</strong><br>@erenturkmen精英级跨平台反推系统提示词。</div></div>`;}else{title='研究来源';content=`<div class="space-y-2 text-xs text-[#909098]"><div><strong class="text-[#1d1d1f]">电影摄影</strong><br>designhero.tv, Promptsera Cinematic Realism Blueprint, X摄影师社区。</div><div><strong class="text-[#1d1d1f]">SREF</strong><br>promptsref.com, @promptsref每日更新。</div><div><strong class="text-[#1d1d1f]">反推模板</strong><br>@erenturkmen — 1,534赞·3,340书签·181,437浏览。</div></div>`;}ct.innerHTML=`<div class="modal-overlay" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-label="${title}" style="display:flex;align-items:center;justify-content:center;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:100;animation:fadeIn 0.15s ease"><div class="modal-box" onclick="event.stopPropagation()" style="background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:480px;width:92%;max-height:80vh;overflow-y:auto"><div class="flex justify-between items-center mb-3"><h3 class="text-base font-semibold">${title}</h3><button onclick="closeModal()" class="text-[#555] hover:text-[#1d1d1f] text-lg leading-none" aria-label="关闭">&times;</button></div>${content}</div></div>`;}
     function closeModal(e){if(e&&e.target!==e.currentTarget)return;document.getElementById('modal-container').innerHTML='';}
     document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
     function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}

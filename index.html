@@ -768,18 +768,65 @@ Source: @erenturkmen — ❤1,534 · 🔖3,340 · 👁181k`;
     }
 
     function buildPrompt(subject) {
-      let base="Cinematic still frame, photorealistic, ultra-detailed, 8k resolution";
-      const parts=[];
-      DIMENSIONS.forEach(dim=>{if(selections[dim.id]){const opt=dim.options.find(o=>o.id===selections[dim.id]);if(opt)parts.push(opt.prompt);}});
-      base+=". "+parts.join(". ");
-      if(selectedSREFs.length){const sk=[...new Set(selectedSREFs.flatMap(s=>s.promptIdeas.split(', ')))];base+=`. SREF: ${sk.join(', ')}`;}
-      if(refImageAnalysis){base+=`. ${refImageAnalysis.temperature==='warm'?'Warm':refImageAnalysis.temperature==='cool'?'Cool':'Balanced'} temperature, ${refImageAnalysis.brightness==='dark'?'low-key dark':refImageAnalysis.brightness==='bright'?'bright':'mid-tone'} exposure`;}
-      if(moodboardAnalysis){base+=`. ${moodboardAnalysis.brightnessCategory==='dark'?'Low-key moody':moodboardAnalysis.brightnessCategory==='bright'?'Bright ethereal':'Balanced'} atmosphere, ${moodboardAnalysis.saturationCategory==='desaturated'?'desaturated muted':moodboardAnalysis.saturationCategory==='saturated'?'rich saturated':'moderate'} color`;}
-      base+=`. ${subject}`;
-      base+=". authentic sub-surface scattering where relevant, intricate textures, profound depth, cinematic realism";
-      if(selectedSREFs.length){base+=`. (Midjourney: ${selectedSREFs.map(s=>`--sref ${s.code}`).join(' ')} --v 7 --sv6)`;}
-      base+=". Avoid: cheap cyberpunk neon, oversaturation, anime, plastic skin, game UI, fantasy armor, AI glossy oil painting effect, smooth waxy skin, 3D CGI render look, low quality, deformed, blurry, cartoonish";
-      return base;
+      // STEP 1: gather what was selected
+      const sel = {};
+      DIMENSIONS.forEach(dim => {
+        if(selections[dim.id]){const o=dim.options.find(x=>x.id===selections[dim.id]);if(o)sel[dim.id]=o.prompt;}
+      });
+
+      // STEP 2: subject FIRST, always. This is the most important rule.
+      let p = subject;
+
+      // STEP 3: technical base — film + lens, natural phrasing
+      let tech = [];
+      if(sel.film) tech.push(sel.film);
+      if(sel.lens) tech.push(sel.lens);
+      if(tech.length) p += ". " + tech.join(", ");
+
+      // STEP 4: mood — lighting + atmosphere
+      let mood = [];
+      if(sel.lighting) mood.push(sel.lighting);
+      if(sel.atmosphere) mood.push(sel.atmosphere);
+      if(mood.length) p += ". " + mood.join(". ");
+
+      // STEP 5: stylistic — color + era + texture
+      let style = [];
+      if(sel.color) style.push(sel.color);
+      if(sel.era) style.push(sel.era);
+      if(sel.texture) style.push(sel.texture);
+      if(style.length) p += ". " + style.join(", ");
+
+      // STEP 6: composition last — how you frame it
+      if(sel.composition) p += ". " + sel.composition;
+
+      // SREF keywords (short, blended)
+      if(selectedSREFs.length) {
+        const kw = [...new Set(selectedSREFs.flatMap(s=>s.promptIdeas.split(', ')))].slice(0,6);
+        p += ". " + kw.join(", ");
+      }
+
+      // Image analysis (only if uploaded)
+      if(refImageAnalysis) {
+        p += ". " + (refImageAnalysis.temperature==='warm'?'Warm tones':refImageAnalysis.temperature==='cool'?'Cool tones':'Balanced tones') + ", " + (refImageAnalysis.brightness==='dark'?'low-key':'bright');
+      }
+
+      // Moodboard (only if uploaded)
+      if(moodboardAnalysis) {
+        p += ". " + (moodboardAnalysis.saturationCategory==='desaturated'?'Desaturated muted palette':moodboardAnalysis.saturationCategory==='saturated'?'Rich saturated palette':'Balanced palette');
+      }
+
+      // Quality tagline — ONE line, not a paragraph
+      p += ". Photorealistic, ultra-detailed, cinematic, 8k";
+
+      // SREF command for Midjourney users
+      if(selectedSREFs.length) {
+        p += ". (Midjourney: " + selectedSREFs.map(s=>"--sref "+s.code).join(" ") + " --v 7 --sv6)";
+      }
+
+      // Negative — short and targeted (the old one was a paragraph of noise)
+      p += ". --no plastic skin, CGI render, oversaturated, anime, text, watermarks, low quality";
+
+      return p;
     }
 
     function renderColorPreview() {

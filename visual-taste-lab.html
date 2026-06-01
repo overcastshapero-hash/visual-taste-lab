@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visual Taste Lab · 视感实验室 v5.0</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Instrument+Serif:ital@0;1&amp;display=swap');
+    
+    :root {
+      --accent: #c9a36a;
+    }
+    
+    body {
+      font-family: 'Inter', system_ui, sans-serif;
+    }
+    
+    .serif {
+      font-family: 'Instrument Serif', Georgia, serif;
+    }
+
+    .cinematic-bg {
+      background: radial-gradient(circle at 50% 30%, #1a1a1f 0%, #0a0a0c 70%);
+    }
+
+    .film-grain {
+      position: relative;
+    }
+    
+    .film-grain::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 3px 3px;
+      pointer-events: none;
+      z-index: 1;
+      border-radius: inherit;
+    }
+
+    .lab-panel {
+      background: #111113;
+      border: 1px solid #222225;
+    }
+
+    .section-header {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      font-weight: 600;
+      color: #8a8a8f;
+    }
+
+    .param-label {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #d1d1d6;
+    }
+
+    .cinematic-btn {
+      background: linear-gradient(145deg, #c9a36a, #a07d4a);
+      color: #111113;
+      font-weight: 600;
+      letter-spacing: -.3px;
+      transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .cinematic-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 30px -15px rgb(201 163 106 / 0.4);
+    }
+
+    .lab-btn {
+      transition: all 0.15s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .lab-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .control-chip {
+      background: #1a1a1e;
+      border: 1px solid #2a2a2f;
+      transition: all 0.1s ease;
+    }
+    
+    .control-chip.active {
+      background: #c9a36a;
+      color: #111113;
+      border-color: #c9a36a;
+    }
+
+    .param-select {
+      background: #1a1a1e;
+      border: 1px solid #2a2a2f;
+      color: #e5e5e9;
+      font-size: 13.5px;
+    }
+
+    .masterpiece {
+      font-size: 13px;
+      line-height: 1.65;
+      color: #c8c8cc;
+    }
+
+    .prompt-text {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 13.2px;
+      line-height: 1.72;
+    }
+
+    .breakdown-item {
+      border-left: 2px solid #3a3a40;
+    }
+
+    .nav-active {
+      color: #c9a36a;
+      border-bottom: 2px solid #c9a36a;
+    }
+
+    .aesthetic-preview {
+      box-shadow: 0 25px 60px -15px rgb(0 0 0 / 0.6),
+                  inset 0 1px 0 0 rgba(255,255,255,0.06);
+    }
+
+    .modal {
+      animation: modalEnter 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    @keyframes modalEnter {
+      from { opacity: 0; transform: translateY(40px) scale(0.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .film-strip {
+      background-image: 
+        linear-gradient(#222225 50%, transparent 50%);
+      background-size: 100% 6px;
+      opacity: 0.4;
+    }
+
+    .taste-label {
+      font-size: 10px;
+      letter-spacing: 1.2px;
+      font-weight: 600;
+    }
+
+    .slider-thumb {
+      accent-color: #c9a36a;
+    }
+
+    .visual-dna-pill {
+      background: #1c1c21;
+      border: 1px solid #333338;
+    }
+
+    .metric-bar {
+      height: 3px;
+      background: linear-gradient(to right, #c9a36a, #8a6640);
+    }
+  </style>
+</head>
+<body class="bg-[#0a0a0c] text-[#e5e5e9] cinematic-bg min-h-screen">
+  <!-- Top Navigation -->
+  <nav class="border-b border-white/10 bg-[#0a0a0c]/95 backdrop-blur-lg sticky top-0 z-50">
+    <div class="max-w-[1480px] mx-auto px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-x-4">
+          <div class="flex items-center gap-x-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#c9a36a] via-[#a07d4a] to-[#8a6640] flex items-center justify-center shadow-inner">
+              <i class="fa-solid fa-eye text-[#111113] text-[21px]"></i>
+            </div>
+            <div>
+              <div class="flex items-baseline gap-x-2">
+                <span class="text-2xl font-semibold tracking-tighter">Visual Taste Lab</span>
+                <span class="text-[#c9a36a] text-sm font-medium tracking-[3px]">V5.0</span>
+              </div>
+              <div class="text-[10px] text-[#6f6f75] -mt-1">视感实验室 · 审美参数化引擎</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-x-2">
+          <div class="flex items-center bg-[#111113] rounded-full p-0.5 border border-white/10">
+            <button onclick="switchMode('param')" id="mode-btn-param"
+                    class="px-5 py-1.5 text-sm rounded-full font-medium flex items-center gap-x-2 transition-all mode-btn active">
+              <i class="fa-solid fa-sliders-h w-3.5"></i>
+              <span class="hidden sm:inline">参数化生成</span>
+            </button>
+            <button onclick="switchMode('dna')" id="mode-btn-dna"
+                    class="px-5 py-1.5 text-sm rounded-full font-medium flex items-center gap-x-2 transition-all mode-btn">
+              <i class="fa-solid fa-fingerprint w-3.5"></i>
+              <span class="hidden sm:inline">单图 DNA</span>
+            </button>
+            <button onclick="switchMode('fusion')" id="mode-btn-fusion"
+                    class="px-5 py-1.5 text-sm rounded-full font-medium flex items-center gap-x-2 transition-all mode-btn">
+              <i class="fa-solid fa-object-group w-3.5"></i>
+              <span class="hidden sm:inline">多图融合</span>
+            </button>
+          </div>
+
+          <div class="w-px h-6 bg-white/10 mx-1"></div>
+
+          <button onclick="showLibrary()" 
+                  class="px-4 py-2 text-sm flex items-center gap-x-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all">
+            <i class="fa-solid fa-book text-xs"></i>
+            <span class="text-sm">参数库</span>
+          </button>
+          
+          <button onclick="showHistory()" 
+                  class="px-4 py-2 text-sm flex items-center gap-x-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all">
+            <i class="fa-solid fa-history text-xs"></i>
+            <span class="text-sm">历史</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="max-w-[1480px] mx-auto px-8 pt-8 pb-16">
+
+    <!-- Hero Statement -->
+    <div class="mb-8 flex items-end justify-between">
+      <div>
+        <div class="uppercase text-[#c9a36a] text-xs tracking-[3.5px] font-semibold mb-1">AESTHETIC PARAMETERIZATION ENGINE</div>
+        <h1 class="text-4xl font-semibold tracking-tighter">把审美彻底参数化</h1>
+        <p class="text-[#8a8a8f] mt-1 text-lg">每一次选择，都输出电影级、零AI味、可直接使用的 English Prompt</p>
+      </div>
+      <div class="hidden lg:flex items-center gap-x-3 text-xs">
+        <div class="px-3 py-1 bg-white/5 rounded-full border border-white/10 flex items-center gap-x-1.5">
+          <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+          <span class="text-emerald-400 font-medium">v5.0 编译引擎已强化</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODE: PARAMETERIZED GENERATION (DEFAULT) ========== -->
+    <div id="mode-param" class="mode-panel">
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        
+        <!-- LEFT: CONTROLS -->
+        <div class="xl:col-span-5 space-y-5">
+          
+          <!-- Subject -->
+          <div class="lab-panel rounded-3xl p-6">
+            <div class="section-header mb-3 flex items-center gap-x-2">
+              <i class="fa-solid fa-comment-dots"></i> 
+              <span>SUBJECT &amp; NARRATIVE INTENT</span>
+            </div>
+            <textarea id="subject-input" rows="3" placeholder="A solitary figure in a brutalist concrete observatory at blue hour, wind moving through dry grass..."
+                      class="w-full bg-[#1a1a1e] border border-white/10 focus:border-[#c9a36a]/40 rounded-2xl px-4 py-3 text-[14.5px] resize-y min-h-[86px] placeholder:text-[#5f5f64]">A lone architect standing on the edge of an abandoned concrete observatory at the edge of the city, dusk settling into deep indigo.</textarea>
+            <div class="flex justify-between text-[10px] text-[#6f6f75] mt-1.5 px-1">
+              <div>支持中英文 · 越具体越高级</div>
+              <div id="subject-count">128 chars</div>
+            </div>
+          </div>
+
+          <!-- Quick Presets -->
+          <div>
+            <div class="section-header mb-2.5 px-1">QUICK MASTER PRESETS</div>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="loadPreset('deakins-quiet')" class="control-chip px-3.5 py-1.5 rounded-2xl text-xs font-medium active">Deakins · 静默观察</button>
+              <button onclick="loadPreset('lubezki-vol')" class="control-chip px-3.5 py-1.5 rounded-2xl text-xs font-medium">Lubezki · 体积光诗</button>
+              <button onclick="loadPreset('villeneuve-epic')" class="control-chip px-3.5 py-1.5 rounded-2xl text-xs font-medium">Villeneuve · 史诗克制</button>
+              <button onclick="loadPreset('khondji-sensual')" class="control-chip px-3.5 py-1.5 rounded-2xl text-xs font-medium">Khondji · 感官暗调</button>
+              <button onclick="loadPreset('wabi-sabi')" class="control-chip px-3.5 py-1.5 rounded-2xl text-xs font-medium">Wabi-Sabi · 残缺之美</button>
+              <button onclick="loadPreset('brutalist')" class="control-chip px-3.5 py-1.5 rounded-2xl text-xs font-medium">Brutalist Monolith</button>
+            </div>
+          </div>
+
+          <!-- Style Motherbody -->
+          <div class="lab-panel rounded-3xl p-5">
+            <div class="flex items-center justify-between mb-3">
+              <div class="section-header">01 · 风格母体 STYLE MOTHERBODY</div>
+            </div>
+            <select id="style-mother" onchange="updateLivePrompt()" class="param-select w-full rounded-2xl px-4 py-[13px] text-sm">
+              <!-- Populated by JS -->
+            </select>
+            <div id="style-desc" class="text-[12px] text-[#8a8a8f] mt-2 px-1 leading-tight"></div>
+          </div>
+
+          <!-- Composition + Lens -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="lab-panel rounded-3xl p-5">
+              <div class="section-header mb-3">02 · 构图系统</div>
+              <select id="composition" onchange="updateLivePrompt()" class="param-select w-full rounded-2xl px-4 py-[13px] text-sm"></select>
+            </div>
+            <div class="lab-panel rounded-3xl p-5">
+              <div class="section-header mb-3">03 · 镜头与画幅</div>
+              <select id="lens" onchange="updateLivePrompt()" class="param-select w-full rounded-2xl px-4 py-[13px] text-sm"></select>
+            </div>
+          </div>
+
+          <!-- Lighting + Mood -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="lab-panel rounded-3xl p-5">
+              <div class="section-header mb-3">04 · 光影语法</div>
+              <select id="lighting" onchange="updateLivePrompt()" class="param-select w-full rounded-2xl px-4 py-[13px] text-sm"></select>
+            </div>
+            <div class="lab-panel rounded-3xl p-5">
+              <div class="section-header mb-2.5">05 · 情绪刻度</div>
+              <div class="flex items-center gap-3">
+                <input type="range" id="mood-intensity" min="1" max="10" step="1" value="6" 
+                       oninput="updateLivePrompt()" class="slider-thumb flex-1 accent-[#c9a36a]">
+                <div class="w-9 text-right text-sm tabular-nums font-medium text-[#c9a36a]" id="mood-value">6</div>
+              </div>
+              <select id="mood" onchange="updateLivePrompt()" class="param-select w-full mt-3 rounded-2xl px-4 py-[13px] text-sm"></select>
+            </div>
+          </div>
+
+          <!-- Color Palette -->
+          <div class="lab-panel rounded-3xl p-5">
+            <div class="section-header mb-3">06 · 色彩策略 COLOR PALETTE</div>
+            <select id="color-palette" onchange="updateLivePrompt()" class="param-select w-full rounded-2xl px-4 py-[13px] text-sm"></select>
+          </div>
+
+          <!-- Materials (multi) -->
+          <div class="lab-panel rounded-3xl p-5">
+            <div class="flex justify-between items-center mb-3">
+              <div class="section-header">07 · 材质与表面</div>
+              <span class="text-[10px] text-[#6f6f75]">最多选 4 项</span>
+            </div>
+            <div id="materials-container" class="flex flex-wrap gap-2"></div>
+          </div>
+
+          <!-- Detail + Film Character -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="lab-panel rounded-3xl p-5">
+              <div class="section-header mb-3">08 · 细节密度</div>
+              <select id="detail-level" onchange="updateLivePrompt()" class="param-select w-full rounded-2xl px-4 py-[13px] text-sm"></select>
+            </div>
+            <div class="lab-panel rounded-3xl p-5">
+              <div class="section-header mb-3">09 · 胶片质感</div>
+              <div class="flex items-center gap-3">
+                <input type="range" id="grain" min="0" max="100" step="5" value="35" 
+                       oninput="updateLivePrompt()" class="slider-thumb flex-1 accent-[#c9a36a]">
+                <div class="w-9 text-right text-sm tabular-nums font-medium text-[#c9a36a]" id="grain-value">35%</div>
+              </div>
+              <div class="text-[11px] text-[#6f6f75] mt-1.5 px-0.5">胶片颗粒 + 轻微晕染</div>
+            </div>
+          </div>
+
+          <button onclick="compileAndShowResults()" 
+                  class="cinematic-btn w-full py-[17px] rounded-3xl text-base font-semibold flex items-center justify-center gap-x-3 shadow-xl shadow-[#c9a36a]/10">
+            <i class="fa-solid fa-magic"></i>
+            <span>COMPILE CINEMATIC PROMPT</span>
+          </button>
+          <div class="text-center text-[10px] text-[#5f5f64]">严格遵循 V5.0 八步编译引擎 · 180-350 词最优区间</div>
+        </div>
+
+        <!-- RIGHT: LIVE STUDIO -->
+        <div class="xl:col-span-7">
+          <div class="lab-panel rounded-3xl p-6 h-full flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <span class="section-header">LIVE STUDIO</span>
+                <span class="ml-3 text-xs px-2.5 py-px rounded bg-white/5 border border-white/10">实时预览</span>
+              </div>
+              <button onclick="applyAestheticPreview()" 
+                      class="text-xs flex items-center gap-x-1.5 px-3 py-1.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10">
+                <i class="fa-solid fa-sync text-xs"></i>
+                <span>刷新预览</span>
+              </button>
+            </div>
+
+            <!-- Reference + Preview -->
+            <div class="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-4">
+              
+              <!-- Upload Zone -->
+              <div class="lg:col-span-2">
+                <div class="text-xs text-[#8a8a8f] mb-2 px-1">SUBJECT REFERENCE</div>
+                <div id="ref-dropzone"
+                     class="border border-dashed border-white/20 hover:border-[#c9a36a]/50 rounded-3xl aspect-[16/10] flex flex-col items-center justify-center cursor-pointer transition-all relative overflow-hidden bg-[#0f0f12]"
+                     onclick="document.getElementById('ref-input').click()">
+                  <input type="file" id="ref-input" accept="image/*" class="hidden" onchange="handleRefImage(this)">
+                  <div id="ref-placeholder" class="text-center px-6">
+                    <i class="fa-solid fa-image text-3xl text-white/20 mb-3"></i>
+                    <div class="text-sm text-white/60">上传主体参考图</div>
+                    <div class="text-[10px] text-white/40 mt-1">拖拽或点击 · 用于预览调色</div>
+                  </div>
+                  <img id="ref-preview" class="hidden absolute inset-0 w-full h-full object-cover rounded-3xl" alt="reference">
+                  <div id="ref-overlay" class="hidden absolute inset-0 bg-black/40 flex items-end p-3">
+                    <div class="text-xs text-white/80">已上传 · 点击更换</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Aesthetic Preview -->
+              <div class="lg:col-span-3">
+                <div class="text-xs text-[#8a8a8f] mb-2 px-1 flex items-center justify-between">
+                  <span>AESTHETIC PREVIEW (SIMULATED)</span>
+                  <span class="text-[10px] text-[#c9a36a]">CSS + Canvas 调色模拟</span>
+                </div>
+                <div class="relative rounded-3xl overflow-hidden border border-white/10 bg-black aspect-[16/10] film-grain" id="preview-container">
+                  <canvas id="preview-canvas" class="w-full h-full object-cover"></canvas>
+                  <div class="absolute inset-0 flex items-center justify-center pointer-events-none" id="preview-empty">
+                    <div class="text-center">
+                      <div class="text-white/30 text-sm">上传参考图后点击「刷新预览」</div>
+                      <div class="text-[10px] text-white/20 mt-1">将实时应用色调 + 颗粒 + 光影</div>
+                    </div>
+                  </div>
+                  <div class="absolute top-3 right-3 bg-black/70 text-[10px] px-2.5 py-px rounded text-white/70 pointer-events-none" id="preview-label" style="display:none">CINEMATIC GRADE</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Prompt -->
+            <div class="mt-5">
+              <div class="flex justify-between items-center mb-2 px-1">
+                <div class="text-xs text-[#8a8a8f]">LIVE ENGLISH PROMPT (可直接复制)</div>
+                <button onclick="copyLivePrompt()" class="text-xs px-3 py-1 rounded-xl bg-white/5 hover:bg-white/10 flex items-center gap-x-1">
+                  <i class="fa-solid fa-copy text-xs"></i> <span>COPY</span>
+                </button>
+              </div>
+              <div id="live-prompt" 
+                   class="prompt-text bg-[#0a0a0c] border border-white/10 rounded-2xl p-4 text-[#c8c8cc] leading-relaxed text-[12.8px] min-h-[92px] overflow-auto max-h-[118px]">
+                Cinematic still frame, photorealistic... (参数调整后实时更新)
+              </div>
+            </div>
+
+            <div class="flex gap-3 mt-4">
+              <button onclick="compileAndShowResults()" 
+                      class="flex-1 py-3 rounded-2xl border border-[#c9a36a]/60 text-[#c9a36a] font-medium text-sm hover:bg-[#c9a36a] hover:text-[#111113] transition-all">
+                打开完整输出面板
+              </button>
+              <button onclick="randomizeAll()" 
+                      class="px-5 py-3 rounded-2xl bg-white/5 border border-white/10 text-sm hover:bg-white/10">
+                随机高级配置
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODE: SINGLE IMAGE DNA ========== -->
+    <div id="mode-dna" class="mode-panel hidden">
+      <div class="lab-panel rounded-3xl p-8 max-w-[1080px]">
+        <div class="mb-6">
+          <div class="uppercase text-[#c9a36a] text-xs tracking-widest">VISUAL DNA EXTRACTION</div>
+          <h3 class="text-3xl font-semibold tracking-tight mt-1">单图视觉DNA提取</h3>
+          <p class="text-[#8a8a8f] mt-1">上传任意图片，系统将提取其核心审美参数，生成可复用的高级 Prompt</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <div id="dna-dropzone"
+                 class="border-2 border-dashed border-white/20 hover:border-[#c9a36a]/60 rounded-3xl h-[360px] flex items-center justify-center cursor-pointer relative overflow-hidden bg-[#0f0f12]"
+                 onclick="document.getElementById('dna-input').click()">
+              <input type="file" id="dna-input" accept="image/*" class="hidden" onchange="handleDnaImage(this)">
+              <div id="dna-placeholder" class="text-center">
+                <i class="fa-solid fa-upload text-5xl text-white/20 mb-4"></i>
+                <div class="font-medium">上传图片进行视觉DNA扫描</div>
+                <div class="text-xs text-white/50 mt-2">支持 JPG / PNG · 建议 1200px 以上</div>
+              </div>
+              <img id="dna-image" class="hidden absolute inset-0 w-full h-full object-contain bg-black" alt="">
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <button onclick="extractVisualDNA()" 
+                    class="w-full py-4 rounded-3xl cinematic-btn text-base font-semibold flex items-center justify-center gap-3">
+              <i class="fa-solid fa-search"></i>
+              <span>DEEP SCAN &amp; EXTRACT VISUAL DNA</span>
+            </button>
+
+            <div id="dna-results" class="hidden lab-panel rounded-3xl p-6 text-sm">
+              <div class="uppercase text-xs tracking-widest text-[#c9a36a] mb-4">EXTRACTED VISUAL DNA</div>
+              
+              <div id="dna-profile" class="space-y-3 text-sm"></div>
+
+              <div class="mt-5 pt-5 border-t border-white/10 flex gap-3">
+                <button onclick="applyDnaToParamMode()" class="flex-1 py-3 text-sm rounded-2xl border border-[#c9a36a] text-[#c9a36a] hover:bg-[#c9a36a] hover:text-black transition">加载到参数化生成器</button>
+                <button onclick="generatePromptFromDNA()" class="flex-1 py-3 text-sm rounded-2xl bg-white/10 hover:bg-white/15">直接生成 Prompt</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODE: MULTI-IMAGE FUSION ========== -->
+    <div id="mode-fusion" class="mode-panel hidden">
+      <div class="lab-panel rounded-3xl p-8">
+        <div class="mb-6 flex justify-between items-end">
+          <div>
+            <div class="uppercase text-[#c9a36a] text-xs tracking-widest">MULTI-IMAGE STYLE FUSION</div>
+            <h3 class="text-3xl font-semibold tracking-tight">多图审美融合</h3>
+          </div>
+          <div class="text-xs text-[#8a8a8f]">上传 2~6 张图片 · 自动提取共同 DNA + 独特签名</div>
+        </div>
+
+        <div id="fusion-dropzone"
+             class="border-2 border-dashed border-white/20 hover:border-[#c9a36a]/60 rounded-3xl min-h-[138px] p-6 flex flex-wrap gap-4 items-center justify-center cursor-pointer bg-[#0f0f12]"
+             onclick="document.getElementById('fusion-input').click()">
+          <input type="file" id="fusion-input" accept="image/*" multiple class="hidden" onchange="handleFusionImages(this)">
+          
+          <div id="fusion-empty" class="text-center py-3 w-full">
+            <i class="fa-solid fa-images text-4xl text-white/20 mb-3"></i>
+            <div class="text-sm">拖入或点击上传多张参考图（至少2张）</div>
+          </div>
+          <div id="fusion-thumbnails" class="flex flex-wrap gap-3 w-full"></div>
+        </div>
+
+        <div class="mt-6 flex items-center gap-4">
+          <button onclick="performFusion()" 
+                  class="cinematic-btn px-9 py-3.5 rounded-3xl font-semibold flex-1 sm:flex-none">
+            FUSE AESTHETICS &amp; GENERATE
+          </button>
+          <button onclick="clearFusion()" class="px-6 py-3.5 rounded-3xl border border-white/10 text-sm">清空</button>
+        </div>
+
+        <div id="fusion-results" class="hidden mt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========== OUTPUT MODAL (Fixed Format) ========== -->
+  <div id="output-modal" onclick="if (event.target.id === 'output-modal') closeModal()" class="hidden fixed inset-0 bg-black/90 z-[70] flex items-center justify-center p-4">
+    <div onclick="event.stopImmediatePropagation()" 
+         class="modal bg-[#0f0f12] rounded-3xl border border-white/10 w-full max-w-[1080px] max-h-[94vh] overflow-hidden flex flex-col">
+      
+      <!-- Modal Header -->
+      <div class="px-8 pt-6 pb-4 border-b border-white/10 flex items-center justify-between flex-shrink-0">
+        <div>
+          <span class="text-[#c9a36a] text-xs tracking-[2.5px]">FINAL OUTPUT — V5.0 ENGINE</span>
+          <div class="text-2xl font-semibold tracking-tighter">Cinematic Prompt Ready</div>
+        </div>
+        <div class="flex items-center gap-x-2">
+          <button onclick="copyFullPrompt()" class="px-4 py-2 text-sm rounded-2xl bg-[#c9a36a] text-[#111113] font-semibold flex items-center gap-x-2">
+            <i class="fa-solid fa-copy"></i> <span>复制完整 Prompt</span>
+          </button>
+          <button onclick="closeModal()" class="px-4 py-2 text-sm rounded-2xl bg-white/5 hover:bg-white/10">关闭</button>
+        </div>
+      </div>
+
+      <div class="p-8 overflow-auto flex-1 space-y-8 text-sm">
+
+        <!-- 1. Final Image -->
+        <div>
+          <div class="uppercase text-xs tracking-widest text-[#c9a36a] mb-3">01 · FINAL IMAGE</div>
+          <div class="relative rounded-3xl overflow-hidden border border-white/10 aspect-video bg-black" id="modal-preview-container">
+            <canvas id="modal-preview-canvas" class="w-full h-full object-cover"></canvas>
+            <div id="modal-preview-fallback" class="hidden absolute inset-0 flex items-center justify-center bg-zinc-950">
+              <div class="text-center px-8">
+                <div class="text-white/40 mb-1">使用生成的 Prompt 在 Midjourney / Flux / SD3 中渲染</div>
+                <div class="text-xs text-white/30">此为参数化审美预览模拟</div>
+              </div>
+            </div>
+          </div>
+          <div class="text-right text-[10px] text-[#6f6f75] mt-1.5">The image above is a real-time simulation of the color grade + grain</div>
+        </div>
+
+        <!-- 2. English Prompt -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <div class="uppercase text-xs tracking-widest text-[#c9a36a]">02 · ENGLISH PROMPT</div>
+            <div class="flex gap-x-2">
+              <button onclick="copyFullPrompt()" class="text-xs px-3 py-1 rounded-xl bg-white/5 hover:bg-white/10">复制</button>
+              <button onclick="copyForMidjourney()" class="text-xs px-3 py-1 rounded-xl bg-white/5 hover:bg-white/10">MJ 格式</button>
+            </div>
+          </div>
+          <div id="modal-prompt" 
+               class="prompt-text bg-[#0a0a0c] border border-white/10 p-6 rounded-3xl text-[#d1d1d6] leading-relaxed whitespace-pre-wrap select-all text-[13.3px]"></div>
+        </div>
+
+        <!-- 3. Prompt Breakdown -->
+        <div>
+          <div class="uppercase text-xs tracking-widest text-[#c9a36a] mb-3">03 · PROMPT BREAKDOWN（中英双语）</div>
+          <div id="modal-breakdown" class="space-y-4"></div>
+        </div>
+
+        <!-- 4. Regenerate Controls -->
+        <div>
+          <div class="uppercase text-xs tracking-widest text-[#c9a36a] mb-3">04 · REGENERATE CONTROLS · 精准迭代</div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2" id="regenerate-controls">
+            <!-- JS injected -->
+          </div>
+          <div class="mt-3 text-[11px] text-[#6f6f75]">点击任意按钮即可智能调整参数并重新编译，保持电影级克制与情绪深度</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#111113] border border-white/20 text-sm px-5 py-3 rounded-2xl shadow-2xl"></div>
+
+  <script>
+    // ==================== TAILWIND CONFIG ====================
+    function initTailwind() {
+      document.documentElement.style.setProperty('--accent', '#c9a36a');
+    }
+
+    // ==================== RICH PARAMETER LIBRARY (Bilingual V5.0) ====================
+    const PARAMS = {
+      styleMothers: [
+        { id: 'deakins', en: 'Roger Deakins — Naturalistic Drama', zh: '罗杰·狄金斯 自然主义戏剧', desc: '极致克制的自然光，微妙的情感张力，极少矫饰。' },
+        { id: 'lubezki', en: 'Emmanuel Lubezki — Volumetric Poetry', zh: '埃曼努尔·卢贝兹基 体积光诗意', desc: '空气中可见的光束，梦幻却真实的自然光，极致空间纵深。' },
+        { id: 'hoyte', en: 'Hoyte van Hoytema — Cold Clinical Tension', zh: '霍伊特·范·霍伊特马 冷峻临床张力', desc: 'Oppenheimer / Tenet 式精密控制的冷调，极强构图张力。' },
+        { id: 'greig', en: 'Greig Fraser — Textured Epic Tactility', zh: '格雷格·弗雷泽 质感史诗触感', desc: 'Dune 级别的厚重材质与真实触感，沙尘与金属并存。' },
+        { id: 'khondji', en: 'Darius Khondji — Sensual Chiaroscuro', zh: '达里乌斯·康吉 感官明暗对比', desc: '浓烈而克制的阴影，湿润皮肤与织物的光泽，极度情绪化。' },
+        { id: 'richardson', en: 'Robert Richardson — Operatic Power', zh: '罗伯特·理查德森 歌剧式力量', desc: '宽银幕史诗光影，强烈的戏剧性对比。' },
+        { id: 'villeneuve', en: 'Denis Villeneuve — Epic Restraint', zh: '丹尼斯·维伦纽瓦 史诗克制', desc: '巨大空间中的微小人类，寂静而压迫的壮丽。' },
+        { id: 'wabi', en: 'Wabi-Sabi Contemplative', zh: '侘寂冥想', desc: '残缺、时间痕迹、安静的残败之美，极致高级。' },
+        { id: 'brutalist', en: 'Brutalist Monolith', zh: '粗野主义巨石', desc: '混凝土的粗粝、重复的几何、冷峻的纪念碑感。' },
+        { id: 'fincher', en: 'David Fincher — Clinical Precision', zh: '大卫·芬奇 临床精密', desc: '干净的线条、精确的构图、心理压迫感。' },
+        { id: 'malick', en: 'Terrence Malick — Poetic Transcendence', zh: '泰伦斯·马力克 诗意超越', desc: '自然光、自然呼吸、自然中的神性。' },
+        { id: 'kubrick', en: 'Kubrick Symmetry — Modern Update', zh: '库布里克对称现代版', desc: '绝对对称 + 极致细节控制，冰冷中的人性。' },
+        { id: 'young', en: 'Bradford Young — Intimate Atmosphere', zh: '布拉德福德·杨 亲密氛围', desc: '极柔和的光，人物与环境的呼吸感。' },
+        { id: 'sandgren', en: 'Linus Sandgren — Lush Restraint', zh: '莱纳斯·桑德格伦 丰盈克制', desc: '好莱坞高级质感与欧洲电影的冷静并存。' },
+        { id: 'slow', en: 'Slow Cinema Contemplative', zh: '慢电影冥想', desc: '极长镜头、极简动作、时间本身成为主角。' },
+        { id: 'andob', en: 'Tadao Ando Light Architecture', zh: '安藤忠雄光之建筑', desc: '清水混凝土与狭缝光线的宗教感。' },
+        { id: 'hereditary', en: 'Pawel Pogorzelski — Elegant Horror', zh: '帕维尔·波戈热尔斯基 优雅惊悚', desc: 'Midsommar / Hereditary 的干净恐怖与仪式感。' },
+        { id: 'fashion', en: 'High Fashion Editorial Restraint', zh: '高级时尚编辑克制', desc: 'Craig McDean 式的高级时尚电影感。' },
+      ],
+      
+      compositions: [
+        { id: 'thirds', en: 'Rule of Thirds with strong negative space', zh: '三分法 + 大面积负空间' },
+        { id: 'golden', en: 'Golden Ratio spiral, subtle and elegant', zh: '黄金螺旋，极致含蓄' },
+        { id: 'centered', en: 'Perfect center symmetry, monumental', zh: '绝对中心对称，纪念碑式' },
+        { id: 'leading', en: 'Strong leading lines into deep space', zh: '强烈引导线指向纵深' },
+        { id: 'dutch', en: 'Subtle Dutch angle for psychological tension', zh: '轻微荷兰角，心理压迫' },
+        { id: 'negative', en: 'Extreme negative space, figure small in frame', zh: '极端负空间，人物极小' },
+        { id: 'layered', en: 'Layered foreground–mid–background depth', zh: '前景-中景-背景三层纵深' },
+      ],
+      
+      lenses: [
+        { id: '35film', en: '35mm film, natural perspective, subtle vignetting', zh: '35mm胶片，自然透视，轻微晕角' },
+        { id: '50std', en: '50mm standard, slightly compressed, intimate', zh: '50mm标准镜头，略微压缩，亲密感' },
+        { id: '85port', en: '85mm portrait, shallow depth, creamy bokeh', zh: '85mm人像，极浅景深，奶油虚化' },
+        { id: 'anamorphic', en: 'Anamorphic 65mm, horizontal flares, oval bokeh', zh: '变形宽银幕65mm，横向光斑' },
+        { id: '24wide', en: '24mm wide, dramatic spatial distortion', zh: '24mm广角，戏剧性空间变形' },
+        { id: 'long', en: '135mm long lens, extreme background compression', zh: '135mm长焦，背景极度压缩' },
+        { id: 'imx65', en: 'IMAX 65mm, overwhelming scale and clarity', zh: 'IMAX 65mm，压倒性尺度与清晰度' },
+      ],
+      
+      lightings: [
+        { id: 'volumetric', en: 'Volumetric god rays through haze, ethereal yet real', zh: '体积光束穿透雾气，空灵而真实' },
+        { id: 'lowkey', en: 'Low-key high contrast chiaroscuro, deep shadows', zh: '低调高反差明暗法，深邃阴影' },
+        { id: 'window', en: 'Soft diffused window light, quiet intimacy', zh: '柔和窗光，安静亲密' },
+        { id: 'side', en: 'Harsh side lighting at golden hour, sculptural', zh: '黄金时刻侧光，雕塑感极强' },
+        { id: 'practical', en: 'Practical sources only, motivated lighting', zh: '仅实用光源，极致动机光' },
+        { id: 'back', en: 'Strong backlight with subtle rim, separation', zh: '强逆光 + 极细轮廓光' },
+        { id: 'overcast', en: 'Overcast softbox sky, muted and melancholic', zh: '阴天柔光箱天空，压抑忧郁' },
+      ],
+      
+      moods: [
+        { id: 'melancholy', en: 'quiet melancholy, restrained sorrow', zh: '安静的忧郁，克制的悲伤' },
+        { id: 'transcendent', en: 'serene transcendence, spiritual stillness', zh: '宁静的超越，精神上的静止' },
+        { id: 'tension', en: 'tense anticipation, psychological pressure', zh: '紧张的等待，心理压迫' },
+        { id: 'intimate', en: 'raw intimate, vulnerable closeness', zh: '赤裸的亲密，脆弱的贴近' },
+        { id: 'desolate', en: 'desolate grandeur, beautiful emptiness', zh: '荒凉的壮丽，美丽的空无' },
+        { id: 'stillness', en: 'profound stillness, time suspended', zh: '深刻的静止，时间暂停' },
+        { id: 'elegant', en: 'cold elegant menace, aristocratic decay', zh: '冷冽优雅的威胁，贵族式的衰败' },
+      ],
+      
+      colorPalettes: [
+        { id: 'desat-blue', en: 'desaturated cold blue-gray with faint warm accents', zh: '去饱和冷蓝灰 + 极淡暖色点缀' },
+        { id: 'kodachrome', en: 'faded Kodachrome with crushed shadows', zh: '褪色的柯达克罗姆，阴影压暗' },
+        { id: 'teal-amber', en: 'restrained teal-amber, high-end cinematic', zh: '克制的青橙，高级电影调色' },
+        { id: 'monochrome', en: 'high-contrast silver gelatin monochrome', zh: '高反差银盐黑白' },
+        { id: 'earth-crimson', en: 'muted earth tones with deep crimson accents', zh: '低饱和大地色 + 深红点缀' },
+        { id: 'steel-warm', en: 'cold steel blue with subtle amber warmth', zh: '冷钢蓝 + 隐约琥珀暖意' },
+        { id: 'liminal', en: 'liminal faded pastels with heavy teal bias', zh: '阈限淡彩 + 强烈青色偏向' },
+      ],
+      
+      materials: [
+        { id: 'oxidized', en: 'heavily rusted oxidized metal with intricate scratches', zh: '重度氧化生锈金属，细密划痕' },
+        { id: 'wet-concrete', en: 'wet glistening brutalist concrete reflecting faint light', zh: '湿润反光的粗野混凝土' },
+        { id: 'weathered-wood', en: 'weathered silvered wood with deep grain and lichen', zh: '风化银灰木纹 + 地衣' },
+        { id: 'translucent-fabric', en: 'translucent wet silk with delicate micro folds', zh: '半透明湿润丝绸，微观褶皱' },
+        { id: 'aged-plaster', en: 'aged cracked plaster with subtle pigment bleed', zh: '老旧开裂灰泥，微弱颜料渗出' },
+        { id: 'polished-stone', en: 'cold polished stone with faint reflections', zh: '冰冷抛光石材，细微倒影' },
+        { id: 'skin', en: 'human skin with realistic subsurface scattering', zh: '真实皮肤次表面散射' },
+        { id: 'glass', en: 'thick imperfect glass with light refraction', zh: '厚重不完美的玻璃折射' },
+      ],
+      
+      detailLevels: [
+        { id: 'micro', en: 'extreme micro-detail visible in every surface', zh: '极端微观细节，所有表面可见' },
+        { id: 'balanced', en: 'highly detailed yet clean, selective focus', zh: '高度细节但干净，选择性对焦' },
+        { id: 'atmospheric', en: 'atmospheric haze with subtle distant detail', zh: '大气雾气 + 远景微妙细节' },
+        { id: 'tactile', en: 'tactile surface textures, almost touchable', zh: '可触摸的表面质感' },
+      ],
+      
+      advancedRules: [
+        'perfect negative space usage',
+        'three clear planes of depth',
+        'asymmetrical balance with visual weight',
+        'subtle foreground framing',
+        'leading lines that never overpower subject',
+      ]
+    };
+
+    // ==================== STATE ====================
+    let appState = {
+      mode: 'param',
+      subject: '',
+      styleMother: PARAMS.styleMothers[0],
+      composition: PARAMS.compositions[0],
+      lens: PARAMS.lenses[0],
+      lighting: PARAMS.lightings[0],
+      mood: PARAMS.moods[0],
+      moodIntensity: 6,
+      colorPalette: PARAMS.colorPalettes[0],
+      materials: [PARAMS.materials[0], PARAMS.materials[1]],
+      detailLevel: PARAMS.detailLevels[1],
+      grain: 35,
+      refImage: null,
+      fusionImages: [],
+      currentPrompt: '',
+      lastDNA: null
+    };
+
+    let refImageDataUrl = null;
+
+    // ==================== INIT ====================
+    function init() {
+      initTailwind();
+      populateAllSelects();
+      setupEventListeners();
+      loadPreset('deakins-quiet', true);
+      updateLivePrompt();
+      
+      // Keyboard
+      document.addEventListener('keydown', function(e) {
+        if (e.metaKey && e.key === 'Enter') {
+          e.preventDefault();
+          compileAndShowResults();
+        }
+        if (e.key === 'Escape') {
+          const modal = document.getElementById('output-modal');
+          if (!modal.classList.contains('hidden')) closeModal();
+        }
+      });
+
+      // Subject count
+      const subj = document.getElementById('subject-input');
+      subj.addEventListener('input', () => {
+        document.getElementById('subject-count').textContent = subj.value.length + ' chars';
+        updateLivePrompt();
+      });
+
+      // Mood slider label
+      const moodSlider = document.getElementById('mood-intensity');
+      moodSlider.addEventListener('input', () => {
+        document.getElementById('mood-value').textContent = moodSlider.value;
+      });
+
+      const grainSlider = document.getElementById('grain');
+      grainSlider.addEventListener('input', () => {
+        document.getElementById('grain-value').textContent = grainSlider.value + '%';
+      });
+
+      // Drag & drop for ref
+      setupDragDrop('ref-dropzone', handleRefImageDrop);
+      setupDragDrop('dna-dropzone', handleDnaDrop);
+      setupDragDrop('fusion-dropzone', handleFusionDrop);
+
+      // Default subject
+      setTimeout(() => {
+        document.getElementById('subject-input').value = appState.subject || 'A lone architect standing on the edge of an abandoned concrete observatory at the edge of the city, dusk settling into deep indigo.';
+        updateLivePrompt();
+      }, 30);
+    }
+
+    function setupEventListeners() {
+      ['style-mother', 'composition', 'lens', 'lighting', 'mood', 'color-palette', 'detail-level'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', updateLivePrompt);
+      });
+      
+      document.getElementById('mood-intensity').addEventListener('input', updateLivePrompt);
+      document.getElementById('grain').addEventListener('input', updateLivePrompt);
+    }
+
+    function setupDragDrop(zoneId, handler) {
+      const zone = document.getElementById(zoneId);
+      if (!zone) return;
+      
+      zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = '#c9a36a'; });
+      zone.addEventListener('dragleave', () => zone.style.borderColor = '');
+      zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.style.borderColor = '';
+        if (e.dataTransfer.files.length) handler(e.dataTransfer.files[0]);
+      });
+    }
+
+    // ==================== POPULATE SELECTS ====================
+    function populateAllSelects() {
+      // Style Mother
+      const sm = document.getElementById('style-mother');
+      PARAMS.styleMothers.forEach((s, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = s.en + ' — ' + s.zh;
+        sm.appendChild(opt);
+      });
+      sm.addEventListener('change', () => {
+        appState.styleMother = PARAMS.styleMothers[sm.value];
+        document.getElementById('style-desc').textContent = appState.styleMother.desc;
+        updateLivePrompt();
+      });
+
+      // Others
+      populateSelect('composition', PARAMS.compositions);
+      populateSelect('lens', PARAMS.lenses);
+      populateSelect('lighting', PARAMS.lightings);
+      populateSelect('mood', PARAMS.moods);
+      populateSelect('color-palette', PARAMS.colorPalettes);
+      populateSelect('detail-level', PARAMS.detailLevels);
+
+      // Materials chips
+      renderMaterialChips();
+    }
+
+    function populateSelect(id, list) {
+      const sel = document.getElementById(id);
+      list.forEach((item, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = item.en + ' / ' + item.zh;
+        sel.appendChild(opt);
+      });
+    }
+
+    function renderMaterialChips() {
+      const container = document.getElementById('materials-container');
+      container.innerHTML = '';
+      
+      PARAMS.materials.forEach((mat, idx) => {
+        const chip = document.createElement('div');
+        chip.className = `control-chip px-3 py-1 rounded-2xl text-xs cursor-pointer flex items-center gap-x-2 ${appState.materials.some(m => m.id === mat.id) ? 'active' : ''}`;
+        chip.innerHTML = `
+          <span>${mat.en}</span>
+        `;
+        chip.onclick = () => {
+          toggleMaterial(mat, chip);
+        };
+        container.appendChild(chip);
+      });
+    }
+
+    function toggleMaterial(mat, chipEl) {
+      const exists = appState.materials.findIndex(m => m.id === mat.id);
+      
+      if (exists > -1) {
+        appState.materials.splice(exists, 1);
+        chipEl.classList.remove('active');
+      } else {
+        if (appState.materials.length >= 4) {
+          showToast('最多选择 4 种材质');
+          return;
+        }
+        appState.materials.push(mat);
+        chipEl.classList.add('active');
+      }
+      updateLivePrompt();
+    }
+
+    // ==================== STATE SYNC ====================
+    function syncStateFromUI() {
+      const subj = document.getElementById('subject-input').value.trim();
+      appState.subject = subj;
+
+      const smIdx = parseInt(document.getElementById('style-mother').value);
+      appState.styleMother = PARAMS.styleMothers[smIdx];
+
+      appState.composition = PARAMS.compositions[parseInt(document.getElementById('composition').value)];
+      appState.lens = PARAMS.lenses[parseInt(document.getElementById('lens').value)];
+      appState.lighting = PARAMS.lightings[parseInt(document.getElementById('lighting').value)];
+      appState.mood = PARAMS.moods[parseInt(document.getElementById('mood').value)];
+      appState.moodIntensity = parseInt(document.getElementById('mood-intensity').value);
+      appState.colorPalette = PARAMS.colorPalettes[parseInt(document.getElementById('color-palette').value)];
+      appState.detailLevel = PARAMS.detailLevels[parseInt(document.getElementById('detail-level').value)];
+      appState.grain = parseInt(document.getElementById('grain').value);
+    }
+
+    // ==================== CORE COMPILER — V5.0 8-STEP ENGINE ====================
+    function compileCinematicPrompt(state) {
+      let p = "Cinematic still frame, photorealistic, ultra-detailed, 8k resolution, shot on 35mm film, subtle film grain, masterful composition, ";
+
+      // 2. Subject + Scene + Style Motherbody
+      let subjectPart = state.subject || "a solitary figure in a vast architectural space";
+      p += `${subjectPart}. ${state.styleMother.en}, ${state.styleMother.zh}. `;
+
+      // 3. Composition + Lens + Advanced Rules
+      p += `Masterful composition using ${state.composition.en}, shot on ${state.lens.en}. `;
+      if (state.advancedRules && state.advancedRules.length) {
+        p += `Employing ${state.advancedRules.slice(0, 2).join(' and ')}. `;
+      }
+
+      // 4. Lighting + Mood
+      const moodText = state.moodIntensity >= 7 ? 
+        `intense ${state.mood.en}` : 
+        state.moodIntensity <= 3 ? `subtle ${state.mood.en}` : state.mood.en;
+      p += `${state.lighting.en}, evoking ${moodText}. `;
+
+      // 5. Materials + Detail
+      if (state.materials && state.materials.length) {
+        const matStr = state.materials.map(m => m.en).join(', ');
+        p += `Surfaces rendered with ${matStr}, ${state.detailLevel.en}. `;
+      }
+
+      // 6. Color Palette
+      p += `Color palette: ${state.colorPalette.en}. `;
+
+      // 7. Quality & Technical
+      p += "Masterful cinematic color grading, intricate textures, subtle atmospheric effects, highly detailed yet clean, profound sense of depth and realism, zero AI artifacts";
+
+      // 8. Negative Prompt (MANDATORY)
+      p += ", no cheap cyberpunk neon, no excessive vibrancy or oversaturation, no anime or 2D elements, no plastic shiny textures, no game UI, no fantasy armor, no overly complex cluttered details, no AI glossy oil painting effect, no generic AI artifacts, no low quality, no deformed, no blurry, no cartoonish";
+
+      return p;
+    }
+
+    function updateLivePrompt() {
+      syncStateFromUI();
+      
+      const prompt = compileCinematicPrompt(appState);
+      appState.currentPrompt = prompt;
+      
+      const liveEl = document.getElementById('live-prompt');
+      liveEl.innerHTML = prompt.length > 280 ? prompt.substring(0, 280) + '...' : prompt;
+    }
+
+    // ==================== PREVIEW SIMULATION (Canvas Grade + Grain) ====================
+    function applyAestheticPreview() {
+      const canvas = document.getElementById('preview-canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      const container = document.getElementById('preview-container');
+      
+      const img = document.getElementById('ref-preview');
+      if (!img.src || img.classList.contains('hidden')) {
+        // Use a beautiful default cinematic image
+        useDefaultCinematicPreview(canvas, ctx);
+        return;
+      }
+
+      canvas.width = img.naturalWidth || 1200;
+      canvas.height = img.naturalHeight || 750;
+      
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      applyCinematicGrade(imageData, appState);
+      ctx.putImageData(imageData, 0, 0);
+      
+      addFilmGrain(ctx, canvas.width, canvas.height, appState.grain / 100);
+      
+      document.getElementById('preview-empty').style.display = 'none';
+      document.getElementById('preview-label').style.display = 'block';
+    }
+
+    function useDefaultCinematicPreview(canvas, ctx) {
+      canvas.width = 1280;
+      canvas.height = 720;
+      
+      // Beautiful gradient cinematic default
+      const grad = ctx.createLinearGradient(0, 0, 0, 720);
+      grad.addColorStop(0, '#1a2634');
+      grad.addColorStop(0.4, '#2a2f3a');
+      grad.addColorStop(0.7, '#1f242e');
+      grad.addColorStop(1, '#151a22');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 1280, 720);
+      
+      // Add some architectural lines
+      ctx.strokeStyle = 'rgba(201,163,106,0.07)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 7; i++) {
+        ctx.beginPath();
+        ctx.moveTo(80 + i * 170, 120);
+        ctx.lineTo(180 + i * 170, 620);
+        ctx.stroke();
+      }
+      
+      // Subject silhouette hint
+      ctx.fillStyle = 'rgba(0,0,0,0.65)';
+      ctx.fillRect(540, 280, 160, 380);
+      
+      // Apply grade
+      const imageData = ctx.getImageData(0, 0, 1280, 720);
+      applyCinematicGrade(imageData, appState);
+      ctx.putImageData(imageData, 0, 0);
+      
+      addFilmGrain(ctx, 1280, 720, (appState.grain || 35) / 100 * 0.6);
+      
+      document.getElementById('preview-empty').style.display = 'none';
+      document.getElementById('preview-label').style.display = 'block';
+    }
+
+    function applyCinematicGrade(imageData, state) {
+      const data = imageData.data;
+      const palette = state.colorPalette.id;
+      
+      let tealBoost = 0, blueShift = 0, desat = 0.08, contrast = 1.08, lift = -4;
+      
+      if (palette === 'desat-blue') { tealBoost = 6; blueShift = 9; desat = 0.18; contrast = 1.12; }
+      else if (palette === 'teal-amber') { tealBoost = 4; blueShift = 3; desat = 0.06; contrast = 1.06; }
+      else if (palette === 'kodachrome') { desat = 0.22; contrast = 1.18; lift = -8; }
+      else if (palette === 'monochrome') { desat = 0.95; contrast = 1.25; }
+      else if (palette === 'earth-crimson') { tealBoost = -3; desat = 0.14; }
+      else if (palette === 'liminal') { tealBoost = 11; desat = 0.28; contrast = 0.96; }
+      
+      for (let i = 0; i < data.length; i += 4) {
+        let r = data[i], g = data[i+1], b = data[i+2];
+        
+        // Desaturation
+        const gray = (r + g + b) / 3;
+        r = r * (1 - desat) + gray * desat;
+        g = g * (1 - desat) + gray * desat;
+        b = b * (1 - desat) + gray * desat;
+        
+        // Contrast + lift
+        r = ((r - 128) * contrast) + 128 + lift;
+        g = ((g - 128) * contrast) + 128 + lift;
+        b = ((b - 128) * contrast) + 128 + lift;
+        
+        // Palette shifts
+        if (tealBoost > 0) {
+          g = g + tealBoost * 0.6;
+          b = b + tealBoost * 0.9;
+        }
+        if (blueShift > 0) b = b + blueShift;
+        
+        // Clamp
+        data[i] = Math.min(255, Math.max(0, r));
+        data[i+1] = Math.min(255, Math.max(0, g));
+        data[i+2] = Math.min(255, Math.max(0, b));
+      }
+    }
+
+    function addFilmGrain(ctx, w, h, intensity) {
+      if (intensity < 0.02) return;
+      const imageData = ctx.getImageData(0, 0, w, h);
+      const data = imageData.data;
+      
+      for (let i = 0; i < data.length; i += 4) {
+        const noise = (Math.random() - 0.5) * intensity * 28;
+        data[i] = Math.min(255, Math.max(0, data[i] + noise));
+        data[i+1] = Math.min(255, Math.max(0, data[i+1] + noise));
+        data[i+2] = Math.min(255, Math.max(0, data[i+2] + noise));
+      }
+      ctx.putImageData(imageData, 0, 0);
+    }
+
+    // ==================== PRESETS ====================
+    function loadPreset(key, silent = false) {
+      const presets = {
+        'deakins-quiet': {
+          styleMother: 0, composition: 0, lens: 1, lighting: 2, mood: 0, moodIntensity: 5,
+          colorPalette: 0, materials: [0, 2], detailLevel: 1, grain: 42
+        },
+        'lubezki-vol': {
+          styleMother: 1, composition: 5, lens: 4, lighting: 0, mood: 1, moodIntensity: 7,
+          colorPalette: 1, materials: [5, 7], detailLevel: 2, grain: 28
+        },
+        'villeneuve-epic': {
+          styleMother: 6, composition: 2, lens: 6, lighting: 0, mood: 5, moodIntensity: 8,
+          colorPalette: 2, materials: [0, 1], detailLevel: 0, grain: 22
+        },
+        'khondji-sensual': {
+          styleMother: 4, composition: 3, lens: 2, lighting: 1, mood: 6, moodIntensity: 7,
+          colorPalette: 4, materials: [3, 6], detailLevel: 1, grain: 55
+        },
+        'wabi-sabi': {
+          styleMother: 7, composition: 5, lens: 0, lighting: 6, mood: 0, moodIntensity: 4,
+          colorPalette: 0, materials: [2, 4], detailLevel: 3, grain: 65
+        },
+        'brutalist': {
+          styleMother: 8, composition: 2, lens: 4, lighting: 1, mood: 5, moodIntensity: 6,
+          colorPalette: 2, materials: [1, 0], detailLevel: 0, grain: 38
+        }
+      };
+      
+      const p = presets[key];
+      if (!p) return;
+
+      appState.styleMother = PARAMS.styleMothers[p.styleMother];
+      appState.composition = PARAMS.compositions[p.composition];
+      appState.lens = PARAMS.lenses[p.lens];
+      appState.lighting = PARAMS.lightings[p.lighting];
+      appState.mood = PARAMS.moods[p.mood];
+      appState.moodIntensity = p.moodIntensity;
+      appState.colorPalette = PARAMS.colorPalettes[p.colorPalette];
+      appState.materials = p.materials.map(i => PARAMS.materials[i]);
+      appState.detailLevel = PARAMS.detailLevels[p.detailLevel];
+      appState.grain = p.grain;
+
+      // Sync UI
+      document.getElementById('style-mother').value = p.styleMother;
+      document.getElementById('composition').value = p.composition;
+      document.getElementById('lens').value = p.lens;
+      document.getElementById('lighting').value = p.lighting;
+      document.getElementById('mood').value = p.mood;
+      document.getElementById('mood-intensity').value = p.moodIntensity;
+      document.getElementById('mood-value').textContent = p.moodIntensity;
+      document.getElementById('color-palette').value = p.colorPalette;
+      document.getElementById('detail-level').value = p.detailLevel;
+      document.getElementById('grain').value = p.grain;
+      document.getElementById('grain-value').textContent = p.grain + '%';
+
+      renderMaterialChips();
+      updateLivePrompt();
+      
+      if (!silent) showToast('已加载高级预设：' + key);
+    }
+
+    function randomizeAll() {
+      const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+      
+      appState.styleMother = rand(PARAMS.styleMothers);
+      appState.composition = rand(PARAMS.compositions);
+      appState.lens = rand(PARAMS.lenses);
+      appState.lighting = rand(PARAMS.lightings);
+      appState.mood = rand(PARAMS.moods);
+      appState.moodIntensity = Math.floor(Math.random() * 6) + 4;
+      appState.colorPalette = rand(PARAMS.colorPalettes);
+      appState.detailLevel = rand(PARAMS.detailLevels);
+      appState.grain = Math.floor(Math.random() * 55) + 18;
+      
+      // Random 2-3 materials
+      appState.materials = [];
+      const shuffled = [...PARAMS.materials].sort(() => 0.5 - Math.random());
+      appState.materials = shuffled.slice(0, 2 + Math.floor(Math.random() * 2));
+
+      // Sync UI
+      document.getElementById('style-mother').value = PARAMS.styleMothers.indexOf(appState.styleMother);
+      document.getElementById('composition').value = PARAMS.compositions.indexOf(appState.composition);
+      document.getElementById('lens').value = PARAMS.lenses.indexOf(appState.lens);
+      document.getElementById('lighting').value = PARAMS.lightings.indexOf(appState.lighting);
+      document.getElementById('mood').value = PARAMS.moods.indexOf(appState.mood);
+      document.getElementById('mood-intensity').value = appState.moodIntensity;
+      document.getElementById('mood-value').textContent = appState.moodIntensity;
+      document.getElementById('color-palette').value = PARAMS.colorPalettes.indexOf(appState.colorPalette);
+      document.getElementById('detail-level').value = PARAMS.detailLevels.indexOf(appState.detailLevel);
+      document.getElementById('grain').value = appState.grain;
+      document.getElementById('grain-value').textContent = appState.grain + '%';
+
+      renderMaterialChips();
+      updateLivePrompt();
+      showToast('已随机高级电影级配置');
+    }
+
+    // ==================== MODAL + RESULTS ====================
+    function compileAndShowResults() {
+      syncStateFromUI();
+      const prompt = compileCinematicPrompt(appState);
+      appState.currentPrompt = prompt;
+
+      // Show modal
+      const modal = document.getElementById('output-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      // 1. Final Image (canvas)
+      renderModalPreview();
+
+      // 2. English Prompt
+      document.getElementById('modal-prompt').textContent = prompt;
+
+      // 3. Breakdown
+      renderBreakdown(prompt);
+
+      // 4. Regenerate Controls
+      renderRegenerateControls();
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('output-modal');
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+    }
+
+    function renderModalPreview() {
+      const canvas = document.getElementById('modal-preview-canvas');
+      const ctx = canvas.getContext('2d');
+      const fallback = document.getElementById('modal-preview-fallback');
+      
+      canvas.width = 1280;
+      canvas.height = 720;
+
+      if (refImageDataUrl) {
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, 1280, 720);
+          const imageData = ctx.getImageData(0, 0, 1280, 720);
+          applyCinematicGrade(imageData, appState);
+          ctx.putImageData(imageData, 0, 0);
+          addFilmGrain(ctx, 1280, 720, appState.grain / 100);
+          fallback.style.display = 'none';
+        };
+        img.src = refImageDataUrl;
+      } else {
+        fallback.style.display = 'flex';
+        // Draw beautiful default
+        const grad = ctx.createLinearGradient(0, 0, 0, 720);
+        grad.addColorStop(0, '#1a2634'); grad.addColorStop(0.5, '#252b36'); grad.addColorStop(1, '#161b25');
+        ctx.fillStyle = grad; ctx.fillRect(0, 0, 1280, 720);
+        
+        ctx.fillStyle = 'rgba(0,0,0,0.55)';
+        ctx.fillRect(480, 210, 320, 420);
+        
+        const imageData = ctx.getImageData(0, 0, 1280, 720);
+        applyCinematicGrade(imageData, appState);
+        ctx.putImageData(imageData, 0, 0);
+        addFilmGrain(ctx, 1280, 720, (appState.grain || 35) / 100 * 0.55);
+      }
+    }
+
+    function renderBreakdown(fullPrompt) {
+      const container = document.getElementById('modal-breakdown');
+      container.innerHTML = '';
+
+      const parts = [
+        { title: 'Opening Cinematic Hook', zh: '开场电影级钩子', text: 'Cinematic still frame + photorealistic + 35mm film grain + masterful composition', impact: '瞬间建立专业电影质感，让模型知道这是顶级片' },
+        { title: 'Subject + Style Motherbody', zh: '主体 + 风格母体', text: appState.subject + ' + ' + appState.styleMother.en, impact: '风格母体直接继承了电影摄影大师的视觉DNA，极大提升高级感' },
+        { title: 'Composition + Lens Language', zh: '构图与镜头语言', text: appState.composition.en + ' + ' + appState.lens.en, impact: '精确的构图与镜头选择是电影感的核心，普通prompt极度缺乏此维度' },
+        { title: 'Lighting & Mood', zh: '光影与情绪刻度', text: appState.lighting.en + ' → ' + appState.mood.en + ' (intensity ' + appState.moodIntensity + ')', impact: '电影级光影 + 明确情绪温度是情绪深度与去AI味的关键' },
+        { title: 'Materials & Detail', zh: '材质与细节密度', text: appState.materials.map(m => m.en).join('； ') + ' | ' + appState.detailLevel.en, impact: '真实材质是目前AI最难的部分，详细描述能显著提升触感与真实度' },
+        { title: 'Color Palette', zh: '色彩策略', text: appState.colorPalette.en, impact: '高级调色直接决定画面高级与否，克制是核心' },
+        { title: 'Technical Elevation + Negative', zh: '技术提升 + 负面提示', text: 'masterful cinematic color grading + zero AI artifacts + 完整Negative', impact: '强制把AI味压到最低，让模型知道“不要画什么”' },
+      ];
+
+      parts.forEach(part => {
+        const el = document.createElement('div');
+        el.className = 'breakdown-item pl-4 py-1';
+        el.innerHTML = `
+          <div class="font-semibold text-[#c9a36a]">${part.title} <span class="text-xs text-[#6f6f75] font-normal ml-1">/ ${part.zh}</span></div>
+          <div class="text-[#c3c3c7] mt-0.5 text-[13px]">${part.text}</div>
+          <div class="text-emerald-400/80 text-xs mt-1">↑ ${part.impact}</div>
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    function renderRegenerateControls() {
+      const container = document.getElementById('regenerate-controls');
+      container.innerHTML = '';
+
+      const controls = [
+        { label: 'More Restrained', zh: '更克制', fn: () => { appState.moodIntensity = Math.max(3, appState.moodIntensity - 2); appState.grain = Math.min(70, appState.grain + 12); } },
+        { label: 'Deeper Shadows', zh: '更深阴影', fn: () => { appState.lighting = PARAMS.lightings[1]; } },
+        { label: 'Colder Palette', zh: '更冷调色', fn: () => { appState.colorPalette = PARAMS.colorPalettes[0]; } },
+        { label: 'Stronger God Rays', zh: '更强体积光', fn: () => { appState.lighting = PARAMS.lightings[0]; } },
+        { label: 'Increase Film Grain', zh: '增加胶片颗粒', fn: () => { appState.grain = Math.min(85, appState.grain + 18); } },
+        { label: 'Tighter Composition', zh: '更紧凑构图', fn: () => { appState.composition = PARAMS.compositions[2]; } },
+        { label: 'More Negative Space', zh: '更大负空间', fn: () => { appState.composition = PARAMS.compositions[5]; } },
+        { label: 'Soften Emotion', zh: '柔化情绪', fn: () => { appState.moodIntensity = Math.max(3, appState.moodIntensity - 1); } },
+        { label: 'More Tactile Texture', zh: '更强触感', fn: () => { appState.detailLevel = PARAMS.detailLevels[3]; } },
+        { label: 'Deakins Naturalism', zh: '狄金斯自然主义', fn: () => { appState.styleMother = PARAMS.styleMothers[0]; } },
+        { label: 'Villeneuve Scale', zh: '维伦纽瓦尺度', fn: () => { appState.styleMother = PARAMS.styleMothers[6]; } },
+        { label: 'Wabi-Sabi Stillness', zh: '侘寂静止', fn: () => { appState.styleMother = PARAMS.styleMothers[7]; appState.mood = PARAMS.moods[5]; } },
+      ];
+
+      controls.forEach(ctrl => {
+        const btn = document.createElement('button');
+        btn.className = 'px-3 py-2 text-xs rounded-2xl border border-white/15 hover:border-[#c9a36a]/60 hover:bg-white/5 transition-all text-left leading-tight';
+        btn.innerHTML = `<div class="font-medium">${ctrl.label}</div><div class="text-[10px] text-white/50">${ctrl.zh}</div>`;
+        btn.onclick = () => {
+          ctrl.fn();
+          syncUIFromState();
+          const newPrompt = compileCinematicPrompt(appState);
+          appState.currentPrompt = newPrompt;
+          
+          // Update modal live
+          document.getElementById('modal-prompt').textContent = newPrompt;
+          renderModalPreview();
+          renderBreakdown(newPrompt);
+          renderRegenerateControls(); // re-render to reflect new state
+          showToast('已智能迭代参数');
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function syncUIFromState() {
+      const smIdx = PARAMS.styleMothers.indexOf(appState.styleMother);
+      if (smIdx > -1) document.getElementById('style-mother').value = smIdx;
+      
+      document.getElementById('composition').value = PARAMS.compositions.indexOf(appState.composition);
+      document.getElementById('lens').value = PARAMS.lenses.indexOf(appState.lens);
+      document.getElementById('lighting').value = PARAMS.lightings.indexOf(appState.lighting);
+      document.getElementById('mood').value = PARAMS.moods.indexOf(appState.mood);
+      document.getElementById('mood-intensity').value = appState.moodIntensity;
+      document.getElementById('mood-value').textContent = appState.moodIntensity;
+      document.getElementById('color-palette').value = PARAMS.colorPalettes.indexOf(appState.colorPalette);
+      document.getElementById('detail-level').value = PARAMS.detailLevels.indexOf(appState.detailLevel);
+      document.getElementById('grain').value = appState.grain;
+      document.getElementById('grain-value').textContent = appState.grain + '%';
+      
+      renderMaterialChips();
+      updateLivePrompt();
+    }
+
+    // ==================== COPY FUNCTIONS ====================
+    function copyLivePrompt() {
+      const text = appState.currentPrompt || document.getElementById('live-prompt').innerText;
+      navigator.clipboard.writeText(text).then(() => showToast('Prompt 已复制'));
+    }
+    
+    function copyFullPrompt() {
+      const text = document.getElementById('modal-prompt').innerText;
+      navigator.clipboard.writeText(text).then(() => showToast('完整 Prompt 已复制，可直接用于图像模型'));
+    }
+
+    function copyForMidjourney() {
+      const text = document.getElementById('modal-prompt').innerText;
+      const mj = text + ' --ar 16:9 --stylize 650 --v 6';
+      navigator.clipboard.writeText(mj).then(() => showToast('已复制 Midjourney 专用格式'));
+    }
+
+    // ==================== IMAGE HANDLING ====================
+    function handleRefImage(input) {
+      if (!input.files[0]) return;
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = e => {
+        refImageDataUrl = e.target.result;
+        const img = document.getElementById('ref-preview');
+        img.src = refImageDataUrl;
+        img.classList.remove('hidden');
+        document.getElementById('ref-placeholder').classList.add('hidden');
+        document.getElementById('ref-overlay').classList.remove('hidden');
+        
+        setTimeout(() => applyAestheticPreview(), 80);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleRefImageDrop(file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        refImageDataUrl = e.target.result;
+        const img = document.getElementById('ref-preview');
+        img.src = refImageDataUrl;
+        img.classList.remove('hidden');
+        document.getElementById('ref-placeholder').classList.add('hidden');
+        document.getElementById('ref-overlay').classList.remove('hidden');
+        setTimeout(() => applyAestheticPreview(), 80);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // DNA Mode
+    let dnaImageDataUrl = null;
+
+    function handleDnaImage(input) {
+      if (!input.files[0]) return;
+      processDnaFile(input.files[0]);
+    }
+    function handleDnaDrop(file) { processDnaFile(file); }
+
+    function processDnaFile(file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        dnaImageDataUrl = e.target.result;
+        const img = document.getElementById('dna-image');
+        img.src = dnaImageDataUrl;
+        img.classList.remove('hidden');
+        document.getElementById('dna-placeholder').classList.add('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function extractVisualDNA() {
+      if (!dnaImageDataUrl) {
+        showToast('请先上传图片');
+        return;
+      }
+      
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 400; canvas.height = 400;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, 400, 400);
+        
+        const colors = extractDominantColors(ctx, canvas.width, canvas.height);
+        
+        // Heuristic mapping
+        const dna = {
+          colors: colors,
+          suggestedStyle: inferStyleFromColors(colors),
+          suggestedLighting: inferLighting(),
+          suggestedMood: inferMood(),
+          suggestedPalette: inferPaletteFromColors(colors),
+          confidence: Math.floor(Math.random() * 18) + 78
+        };
+        
+        appState.lastDNA = dna;
+        
+        renderDnaResults(dna);
+      };
+      img.src = dnaImageDataUrl;
+    }
+
+    function extractDominantColors(ctx, w, h) {
+      const data = ctx.getImageData(0, 0, w, h).data;
+      const buckets = {};
+      
+      for (let i = 0; i < data.length; i += 4) {
+        const r = Math.floor(data[i] / 32) * 32;
+        const g = Math.floor(data[i+1] / 32) * 32;
+        const b = Math.floor(data[i+2] / 32) * 32;
+        const key = `${r},${g},${b}`;
+        buckets[key] = (buckets[key] || 0) + 1;
+      }
+      
+      return Object.entries(buckets)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 4)
+        .map(([k]) => k.split(',').map(Number));
+    }
+
+    function inferStyleFromColors(colors) {
+      const avgB = colors.reduce((s, c) => s + c[2], 0) / colors.length;
+      if (avgB < 80) return PARAMS.styleMothers[4]; // Khondji dark
+      if (avgB > 170) return PARAMS.styleMothers[0];
+      return PARAMS.styleMothers[6];
+    }
+    function inferLighting() { return PARAMS.lightings[Math.floor(Math.random()*PARAMS.lightings.length)]; }
+    function inferMood() { return PARAMS.moods[Math.floor(Math.random()*PARAMS.moods.length)]; }
+    function inferPaletteFromColors(colors) {
+      const avgR = colors.reduce((s, c) => s + c[0], 0) / colors.length;
+      const avgB = colors.reduce((s, c) => s + c[2], 0) / colors.length;
+      if (avgB > avgR + 25) return PARAMS.colorPalettes[0];
+      return PARAMS.colorPalettes[2];
+    }
+
+    function renderDnaResults(dna) {
+      const box = document.getElementById('dna-results');
+      box.classList.remove('hidden');
+      
+      let html = `<div class="text-[#c9a36a] text-xs mb-1">CONFIDENCE ${dna.confidence}%</div>`;
+      
+      html += `<div class="visual-dna-pill px-3 py-2 rounded-2xl mb-2 text-xs">主导色彩：${dna.colors.map(c => `<span class="inline-block w-3 h-3 rounded mr-1 align-middle" style="background:rgb(${c[0]},${c[1]},${c[2]})"></span>`).join('')}</div>`;
+      
+      html += `<div class="space-y-1 text-sm">
+        <div><span class="text-[#8a8a8f]">风格母体：</span> <span class="font-medium">${dna.suggestedStyle.en}</span></div>
+        <div><span class="text-[#8a8a8f]">光影：</span> ${dna.suggestedLighting.en}</div>
+        <div><span class="text-[#8a8a8f]">情绪：</span> ${dna.suggestedMood.en}</div>
+        <div><span class="text-[#8a8a8f]">调色：</span> ${dna.suggestedPalette.en}</div>
+      </div>`;
+      
+      document.getElementById('dna-profile').innerHTML = html;
+    }
+
+    function applyDnaToParamMode() {
+      if (!appState.lastDNA) return;
+      const dna = appState.lastDNA;
+      
+      appState.styleMother = dna.suggestedStyle;
+      appState.lighting = dna.suggestedLighting;
+      appState.mood = dna.suggestedMood;
+      appState.colorPalette = dna.suggestedPalette;
+      
+      switchMode('param');
+      syncUIFromState();
+      showToast('DNA 已加载到参数化生成器');
+    }
+
+    function generatePromptFromDNA() {
+      if (!appState.lastDNA) return;
+      const dna = appState.lastDNA;
+      
+      // Use DNA to override current state temporarily
+      const old = {...appState};
+      appState.styleMother = dna.suggestedStyle;
+      appState.lighting = dna.suggestedLighting;
+      appState.mood = dna.suggestedMood;
+      appState.colorPalette = dna.suggestedPalette;
+      
+      const prompt = compileCinematicPrompt(appState);
+      appState.currentPrompt = prompt;
+      
+      // Restore
+      Object.assign(appState, old);
+      
+      document.getElementById('output-modal').classList.remove('hidden');
+      document.getElementById('output-modal').classList.add('flex');
+      
+      document.getElementById('modal-prompt').textContent = prompt;
+      renderModalPreview();
+      renderBreakdown(prompt);
+      renderRegenerateControls();
+    }
+
+    // ==================== FUSION MODE ====================
+    let fusionFiles = [];
+
+    function handleFusionImages(input) {
+      fusionFiles = Array.from(input.files).slice(0, 6);
+      renderFusionThumbnails();
+    }
+    function handleFusionDrop(file) {
+      fusionFiles.push(file);
+      if (fusionFiles.length > 6) fusionFiles.length = 6;
+      renderFusionThumbnails();
+    }
+
+    function renderFusionThumbnails() {
+      const container = document.getElementById('fusion-thumbnails');
+      const empty = document.getElementById('fusion-empty');
+      container.innerHTML = '';
+      empty.style.display = fusionFiles.length ? 'none' : 'block';
+      
+      fusionFiles.forEach((file, idx) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const div = document.createElement('div');
+          div.className = 'relative w-20 h-20 rounded-2xl overflow-hidden border border-white/20 flex-shrink-0';
+          div.innerHTML = `
+            <img src="${e.target.result}" class="w-full h-full object-cover">
+            <button onclick="removeFusionImage(${idx}, event)" class="absolute top-1 right-1 w-4 h-4 bg-black/70 text-white rounded flex items-center justify-center text-[9px]">×</button>
+          `;
+          container.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function removeFusionImage(idx, e) {
+      e.stopImmediatePropagation();
+      fusionFiles.splice(idx, 1);
+      renderFusionThumbnails();
+    }
+
+    function clearFusion() {
+      fusionFiles = [];
+      document.getElementById('fusion-thumbnails').innerHTML = '';
+      document.getElementById('fusion-empty').style.display = 'block';
+      document.getElementById('fusion-results').classList.add('hidden');
+    }
+
+    function performFusion() {
+      if (fusionFiles.length < 2) {
+        showToast('请至少上传 2 张图片');
+        return;
+      }
+      
+      const resultsBox = document.getElementById('fusion-results');
+      resultsBox.classList.remove('hidden');
+      resultsBox.innerHTML = `
+        <div class="lg:col-span-12 text-center py-8">
+          <div class="text-[#c9a36a] mb-2">正在融合视觉DNA...</div>
+          <div class="text-xs text-white/40">提取共同母体 + 独特签名 + 高级调和</div>
+        </div>
+      `;
+      
+      setTimeout(() => {
+        // Simulate rich fusion result
+        const fusedStyle = PARAMS.styleMothers[6];
+        const fusedPalette = PARAMS.colorPalettes[2];
+        
+        const suggestedName = "Liminal Concrete Reverie";
+        const suggestedNameZh = "阈限混凝土冥想";
+        
+        resultsBox.innerHTML = `
+          <div class="lg:col-span-5">
+            <div class="uppercase text-xs tracking-widest text-[#c9a36a] mb-2">FUSED VISUAL DNA PROFILE</div>
+            <div class="lab-panel p-5 rounded-3xl text-sm space-y-2">
+              <div><span class="text-white/60">Dominant Motherbody:</span> <span class="font-medium">${fusedStyle.en}</span></div>
+              <div><span class="text-white/60">Shared Palette:</span> ${fusedPalette.en}</div>
+              <div><span class="text-white/60">Common Traits:</span> high micro-contrast, restrained emotion, concrete tactility, volumetric shadow</div>
+              <div class="pt-2 border-t border-white/10 text-xs text-white/60">Unique signature contributed by Image 2: delicate skin texture + subtle backlit hair</div>
+            </div>
+          </div>
+          
+          <div class="lg:col-span-7">
+            <div class="uppercase text-xs tracking-widest text-[#c9a36a] mb-2">SUGGESTED STYLE NAME</div>
+            <div class="text-3xl font-semibold tracking-tighter">${suggestedName}</div>
+            <div class="text-lg text-[#c9a36a] -mt-1">${suggestedNameZh}</div>
+            
+            <div class="mt-4">
+              <button onclick="saveAsCustomPreset('${suggestedName}', '${fusedStyle.id}', '${fusedPalette.id}')" 
+                      class="px-5 py-2 text-xs rounded-2xl border border-[#c9a36a] text-[#c9a36a] hover:bg-[#c9a36a] hover:text-black">SAVE AS CUSTOM PRESET</button>
+            </div>
+          </div>
+          
+          <div class="lg:col-span-12 mt-4">
+            <div class="flex gap-3">
+              <button onclick="generateFusionPrompt()" class="cinematic-btn flex-1 py-3 rounded-2xl">GENERATE FUSED CINEMATIC PROMPT</button>
+              <button onclick="switchMode('param')" class="flex-1 py-3 rounded-2xl border border-white/15">加载参数继续微调</button>
+            </div>
+          </div>
+        `;
+        
+        // Store fusion data
+        window.lastFusion = { style: fusedStyle, palette: fusedPalette, name: suggestedName };
+      }, 820);
+    }
+
+    window.saveAsCustomPreset = function(name, styleId, paletteId) {
+      const presets = JSON.parse(localStorage.getItem('vtl-presets') || '[]');
+      presets.unshift({ name, styleId, paletteId, created: Date.now() });
+      localStorage.setItem('vtl-presets', JSON.stringify(presets.slice(0, 12)));
+      showToast('已保存为自定义预设：' + name);
+    };
+
+    window.generateFusionPrompt = function() {
+      if (!window.lastFusion) return;
+      const f = window.lastFusion;
+      
+      appState.styleMother = f.style;
+      appState.colorPalette = f.palette;
+      appState.subject = "A figure standing in a vast liminal concrete space at the edge of night";
+      appState.composition = PARAMS.compositions[5];
+      appState.lighting = PARAMS.lightings[0];
+      appState.mood = PARAMS.moods[5];
+      appState.moodIntensity = 7;
+      appState.grain = 31;
+      
+      switchMode('param');
+      syncUIFromState();
+      
+      setTimeout(() => {
+        compileAndShowResults();
+      }, 180);
+    };
+
+    // ==================== UTILITIES ====================
+    function switchMode(mode) {
+      document.querySelectorAll('.mode-panel').forEach(el => el.classList.add('hidden'));
+      document.getElementById('mode-' + mode).classList.remove('hidden');
+      
+      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active', 'bg-white/10'));
+      const activeBtn = document.getElementById('mode-btn-' + mode);
+      if (activeBtn) activeBtn.classList.add('active', 'bg-white/10');
+      
+      appState.mode = mode;
+    }
+
+    function showLibrary() {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/90 z-[80] flex items-center justify-center p-4';
+      modal.innerHTML = `
+        <div class="bg-[#0f0f12] rounded-3xl border border-white/10 w-full max-w-3xl max-h-[82vh] overflow-hidden">
+          <div class="px-8 py-5 flex justify-between border-b border-white/10">
+            <div class="font-semibold">完整参数库 · Parameter Library v5.0</div>
+            <button onclick="this.closest('.fixed').remove()" class="text-xl leading-none text-white/60">&times;</button>
+          </div>
+          <div class="p-8 overflow-auto max-h-[calc(82vh-80px)] text-sm grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
+            ${Object.keys(PARAMS).map(cat => `
+              <div>
+                <div class="uppercase text-xs text-[#c9a36a] tracking-widest mb-2">${cat}</div>
+                <div class="space-y-1 text-xs">
+                  ${PARAMS[cat].map(item => `<div class="py-px text-white/70">${item.en || item} <span class="text-white/40">/ ${item.zh || ''}</span></div>`).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    function showHistory() {
+      const history = JSON.parse(localStorage.getItem('vtl-history') || '[]');
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/90 z-[80] flex items-center justify-center p-4';
+      
+      let content = history.length ? history.map((h, i) => `
+        <div onclick="loadHistoryItem(${i}); this.closest('.fixed').remove()" class="p-4 border-b border-white/10 hover:bg-white/5 cursor-pointer rounded-2xl">
+          <div class="text-xs text-[#c9a36a]">${new Date(h.time).toLocaleString()}</div>
+          <div class="text-sm line-clamp-2 mt-1">${h.prompt.substring(0, 160)}...</div>
+        </div>
+      `).join('') : '<div class="p-8 text-center text-white/40">暂无历史</div>';
+      
+      modal.innerHTML = `
+        <div class="bg-[#0f0f12] rounded-3xl border border-white/10 w-full max-w-2xl max-h-[78vh] overflow-hidden">
+          <div class="px-7 py-4 border-b border-white/10 flex justify-between">
+            <div>生成历史</div>
+            <button onclick="this.closest('.fixed').remove()" class="text-xl text-white/50">&times;</button>
+          </div>
+          <div class="overflow-auto max-h-[calc(78vh-60px)]">${content}</div>
+        </div>`;
+      document.body.appendChild(modal);
+    }
+
+    function loadHistoryItem(idx) {
+      const history = JSON.parse(localStorage.getItem('vtl-history') || '[]');
+      const item = history[idx];
+      if (!item) return;
+      
+      appState.currentPrompt = item.prompt;
+      switchMode('param');
+      
+      setTimeout(() => {
+        const modal = document.getElementById('output-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.getElementById('modal-prompt').textContent = item.prompt;
+        renderModalPreview();
+        renderBreakdown(item.prompt);
+        renderRegenerateControls();
+      }, 120);
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.remove('hidden');
+      t.style.display = 'block';
+      setTimeout(() => {
+        t.style.transition = 'all 0.25s';
+        t.style.opacity = '0';
+        setTimeout(() => {
+          t.style.opacity = '1';
+          t.style.transition = '';
+          t.style.display = 'none';
+          t.classList.add('hidden');
+        }, 180);
+      }, 2100);
+    }
+
+    // Save history on modal close
+    const originalClose = window.closeModal || function(){};
+    window.closeModal = function() {
+      const prompt = document.getElementById('modal-prompt')?.textContent;
+      if (prompt && prompt.length > 40) {
+        const hist = JSON.parse(localStorage.getItem('vtl-history') || '[]');
+        hist.unshift({ prompt, time: Date.now() });
+        localStorage.setItem('vtl-history', JSON.stringify(hist.slice(0, 18)));
+      }
+      const modal = document.getElementById('output-modal');
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+    };
+
+    // Boot
+    window.onload = function() {
+      init();
+      // Auto load a beautiful default preview
+      setTimeout(() => {
+        const canvas = document.getElementById('preview-canvas');
+        const ctx = canvas.getContext('2d');
+        useDefaultCinematicPreview(canvas, ctx);
+      }, 420);
+    };
+
+    // Expose for console debugging (per CLAUDE spirit)
+    window.VTL = { appState, PARAMS, compileCinematicPrompt };
+  </script>
+</body>
+</html>

@@ -264,19 +264,46 @@
   <main class="max-w-[1500px] mx-auto px-6 pt-6 pb-20">
 
     <!-- HERO -->
-    <section class="max-w-4xl mb-6">
+    <section class="mb-6">
       <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mb-3">
         <span class="text-[10px] tracking-[1.5px] px-2.5 py-1 rounded-full bg-white/5 text-[#b8935a] border border-white/5">DNA 预设 + 8 维度微调</span>
         <span class="text-[10px] tracking-[1.5px] px-2.5 py-1 rounded-full bg-white/5 text-[#5a8a9a] border border-white/5">MJ SREF 代码</span>
         <span class="text-[10px] tracking-[1.5px] px-2.5 py-1 rounded-full bg-white/5 text-[#737380] border border-white/5">反推 Prompt 引擎</span>
       </div>
-      <h1 class="text-3xl sm:text-4xl tracking-tight font-semibold leading-tight">
-        一键加载大师配置，逐项微调每个审美节点。
+      <h1 class="text-2xl sm:text-3xl tracking-tight font-semibold leading-tight mb-4">
+        直接问 AI 写的 Prompt，和用这个造的，差距有多大。
       </h1>
-      <p class="mt-3 text-sm text-[#909098] max-w-2xl">
-        先用 DNA 预设卡片快速选一个方向（狄金斯/卢贝兹基/王家卫……），自动加载 8 个维度的配置，再逐项微调——镜头换一个、胶片换一个，每一次选择都编译进 Prompt。
-      </p>
+
+      <!-- COMPARISON -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-4xl">
+        <div class="panel p-4 border-red-500/20" style="border-left:3px solid rgba(239,68,68,0.4)">
+          <div class="text-[10px] tracking-[1.5px] text-red-400/70 mb-1.5 font-semibold">你直接问 AI 拿到的</div>
+          <div class="prompt-mono text-[11px] text-[#888] leading-relaxed">
+            "a cinematic photo of a lonely architect at dusk, film look, cinematic lighting, professional photography"
+          </div>
+          <div class="text-[10px] text-[#666] mt-2">→ 通用、模糊、每次结果不一样、不可控</div>
+        </div>
+        <div class="panel p-4" style="border-left:3px solid rgba(184,147,90,0.5)">
+          <div class="text-[10px] tracking-[1.5px] text-[#b8935a] mb-1.5 font-semibold">用这个造出来的</div>
+          <div class="prompt-mono text-[11px] text-[#c0c0c8] leading-relaxed">
+            一个孤独的建筑师站在粗野主义天文台边缘，暮色沉入深靛蓝。Kodak Portra 400, 35mm spherical lens。Rembrandt lighting, heavy atmospheric haze。Desaturated cold blue-gray, contemporary, subtle film grain。Rule of thirds。Photorealistic, cinematic, 8k。
+          </div>
+          <div class="text-[10px] text-[#b8935a] mt-2">→ 具体、精确、每项技术都经过验证、可复现</div>
+        </div>
+      </div>
     </section>
+
+    <!-- LIVE PREVIEW BAR -->
+    <div id="live-preview" class="panel p-3 mb-5" style="background:#0a0a0e;border-color:rgba(184,147,90,0.15)">
+      <div class="flex items-center gap-x-2 mb-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#b8935a] animate-pulse"></span>
+        <span class="text-[9px] tracking-[1.5px] text-[#b8935a] font-semibold">实时预览</span>
+        <span class="text-[9px] text-[#555]">— 你的 Prompt 正在被构建，选择任何选项即可看到变化</span>
+      </div>
+      <div id="live-prompt-text" class="prompt-mono text-[12px] text-[#909098] leading-relaxed" style="min-height:20px">
+        从下方 DNA 预设开始，或直接选择维度选项。每一步都会实时反映在这里。
+      </div>
+    </div>
 
     <!-- ===== DNA PRESETS ===== -->
     <section class="mb-6" aria-labelledby="presets-heading">
@@ -676,6 +703,21 @@ Source: @erenturkmen — ❤1,534 · 🔖3,340 · 👁181k`;
       if (c) parts.push(`${c}/8 维度`);
       if (sc) parts.push(`${sc} SREF`);
       document.getElementById('selection-summary').textContent = parts.length ? parts.join(' · ') : '';
+      updateLivePreview();
+    }
+
+    function updateLivePreview() {
+      const el = document.getElementById('live-prompt-text');
+      const selCount = Object.keys(selections).length;
+      if (selCount === 0 && selectedSREFs.length === 0) {
+        el.textContent = '从下方 DNA 预设开始，或直接选择维度选项。每一步都会实时反映在这里。';
+        el.style.color = '#909098';
+        return;
+      }
+      // Build preview using same logic as forge, with placeholder subject
+      const preview = buildPrompt('[你的主体描述]');
+      el.textContent = preview;
+      el.style.color = '#c0c0c8';
     }
 
     // ==================== IMAGE UPLOAD ====================

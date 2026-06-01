@@ -854,63 +854,59 @@ Source: @erenturkmen — ❤1,534 · 🔖3,340 · 👁181k`;
     }
 
     function buildPrompt(subject) {
-      // STEP 1: gather what was selected
+      // Gather the selected fragment for each dimension.
       const sel = {};
       DIMENSIONS.forEach(dim => {
         if(selections[dim.id]){const o=dim.options.find(x=>x.id===selections[dim.id]);if(o)sel[dim.id]=o.prompt;}
       });
 
-      // STEP 2: subject FIRST, always. This is the most important rule.
-      let p = subject;
+      // Modern image models (Flux, MJ V7, Nano Banana, GPT-image) read coherent
+      // natural language, not comma-piled tags. So compile the dimensions into
+      // connected clauses across a few sentences instead of keyword soup.
+      const cap = s => s ? s.charAt(0).toUpperCase()+s.slice(1) : s;
+      const sentences = [];
 
-      // STEP 3: technical base — film + lens, natural phrasing
-      let tech = [];
-      if(sel.film) tech.push(sel.film);
-      if(sel.lens) tech.push(sel.lens);
-      if(tech.length) p += ". " + tech.join(", ");
+      // 1) THE SHOT — subject, how it's framed, on what lens.
+      let shot = (subject && subject.trim()) ? subject.trim() : "[your subject]";
+      if(sel.composition) shot += `, composed with ${sel.composition}`;
+      if(sel.lens) shot += `, captured on a ${sel.lens}`;
+      sentences.push(cap(shot));
 
-      // STEP 4: mood — lighting + atmosphere
-      let mood = [];
-      if(sel.lighting) mood.push(sel.lighting);
-      if(sel.atmosphere) mood.push(sel.atmosphere);
-      if(mood.length) p += ". " + mood.join(". ");
+      // 2) THE LIGHT — lighting + atmosphere woven together.
+      let light = "";
+      if(sel.lighting) light = `lit by ${sel.lighting}`;
+      if(sel.atmosphere) light += (light ? ", with " : "set ") + sel.atmosphere;
+      if(light) sentences.push(cap(light));
 
-      // STEP 5: stylistic — color + era + texture
-      let style = [];
-      if(sel.color) style.push(sel.color);
-      if(sel.era) style.push(sel.era);
-      if(sel.texture) style.push(sel.texture);
-      if(style.length) p += ". " + style.join(", ");
+      // 3) THE LOOK — film stock, grade, texture, era as connected clauses.
+      const look = [];
+      if(sel.film) look.push(sel.film);
+      if(sel.color) look.push(`graded toward ${sel.color}`);
+      if(sel.texture) look.push(`finished with ${sel.texture}`);
+      if(sel.era) look.push(`evoking ${sel.era}`);
+      if(look.length) sentences.push(cap(look.join(", ")));
 
-      // STEP 6: composition last — how you frame it
-      if(sel.composition) p += ". " + sel.composition;
-
-      // SREF keywords (short, blended)
-      if(selectedSREFs.length) {
-        const kw = [...new Set(selectedSREFs.flatMap(s=>s.promptIdeas.split(', ')))].slice(0,6);
-        p += ". " + kw.join(", ");
-      }
-
-      // Image analysis (only if uploaded)
+      // Reference image tone — as a natural clause, not tags.
       if(refImageAnalysis) {
-        p += ". " + (refImageAnalysis.temperature==='warm'?'Warm tones':refImageAnalysis.temperature==='cool'?'Cool tones':'Balanced tones') + ", " + (refImageAnalysis.brightness==='dark'?'low-key':'bright');
+        const tone = refImageAnalysis.temperature==='warm'?'a warm tonal balance':refImageAnalysis.temperature==='cool'?'a cool tonal balance':'a neutral tonal balance';
+        const key = refImageAnalysis.brightness==='dark'?'low-key and shadowed':'bright and open';
+        sentences.push(`Carrying ${tone}, ${key}`);
       }
-
-      // Moodboard (only if uploaded)
       if(moodboardAnalysis) {
-        p += ". " + (moodboardAnalysis.saturationCategory==='desaturated'?'Desaturated muted palette':moodboardAnalysis.saturationCategory==='saturated'?'Rich saturated palette':'Balanced palette');
+        const pal = moodboardAnalysis.saturationCategory==='desaturated'?'a desaturated, muted palette':moodboardAnalysis.saturationCategory==='saturated'?'a rich, saturated palette':'a balanced palette';
+        sentences.push(`Holding to ${pal} consistent with the reference set`);
       }
 
-      // Quality tagline — ONE line, not a paragraph
-      p += ". Photorealistic, ultra-detailed, cinematic, 8k";
+      let p = sentences.join(". ").replace(/\s+/g,' ').trim();
+      if(!/[.!?]$/.test(p)) p += ".";
 
-      // SREF command for Midjourney users
+      // No "photorealistic, ultra-detailed, 8k" tail — modern models render that by
+      // default; the tail only adds noise and reads as AI slop.
+
+      // SREF carries STYLE on its own line — never stuff style words into the prose.
       if(selectedSREFs.length) {
-        p += ". (Midjourney: " + selectedSREFs.map(s=>"--sref "+s.code).join(" ") + " --v 7 --sv6)";
+        p += "\n\nMidjourney style: " + selectedSREFs.map(s=>"--sref "+s.code).join(" ") + " --v 7 --sv6";
       }
-
-      // Negative — short and targeted (the old one was a paragraph of noise)
-      p += ". --no plastic skin, CGI render, oversaturated, anime, text, watermarks, low quality";
 
       return p;
     }
